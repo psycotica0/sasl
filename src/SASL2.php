@@ -45,13 +45,7 @@
 
 namespace Fabiang\Sasl;
 
-use Fabiang\Sasl\Auth\Anonymous;
-use Fabiang\Sasl\Auth\Login;
-use Fabiang\Sasl\Auth\Plain;
-use Fabiang\Sasl\Auth\External;
-use Fabiang\Sasl\Auth\CramMD5;
-use Fabiang\Sasl\Auth\DigestMD5;
-use Fabiang\Sasl\Auth\SCRAM;
+use Fabiang\Sasl\Exception\InvalidArgumentException;
 
 class SASL2
 {

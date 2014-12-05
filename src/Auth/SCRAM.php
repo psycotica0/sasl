@@ -166,7 +166,6 @@ class SCRAM extends Common
     */
     private function _generateInitialResponse($authcid, $authzid)
     {
-        $init_rep = '';
         $gs2_cbind_flag = 'n,'; // TODO: support channel binding.
         $this->gs2_header = $gs2_cbind_flag . (!empty($authzid)? 'a=' . $authzid : '') . ',';
 
