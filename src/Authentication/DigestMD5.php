@@ -89,11 +89,6 @@ class DigestMD5 implements AuthenticationInterface
             if ($parsedChallenge['realm']) {
                 $realm = $parsedChallenge['realm'];
 
-                // concat multiple realsm together.
-                if (is_array($realm)) {
-                    $realm = implode('",realm="', $realm);
-                }
-
                 return sprintf(
                     'username="%s",realm="%s"%s,nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",'
                     . 'response=%s,maxbuf=%d',

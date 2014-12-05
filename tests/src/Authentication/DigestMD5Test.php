@@ -93,31 +93,6 @@ class DigestMD5Test extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::parseChallenge
-     * @covers ::getResponse
-     * @uses Fabiang\Sasl\Authentication\DigestMD5::trim
-     * @uses Fabiang\Sasl\Authentication\DigestMD5::getResponseValue
-     * @uses Fabiang\Sasl\Authentication\DigestMD5::getCnonce
-     */
-    public function testGetResponseChallengeHasAllowdMultipleValues()
-    {
-        $this->assertRegExp(
-            '#^username="authcid",realm="localhost",realm="localhost",realm="localhost",authzid="authzid",'
-            . 'nonce="abcdefghijklmnopqrstuvw",cnonce="[^"]+",nc=00000001,'
-            . 'qop=auth,digest-uri="service/hostname",response=[^,]+,maxbuf=65536$#',
-            $this->object->getResponse(
-                'authcid',
-                'pass',
-                'realm="localhost",realm="localhost",realm="localhost",nonce="abcdefghijklmnopqrstuvw",qop="auth",'
-                . 'charset=utf-8,algorithm=md5-sess',
-                'hostname',
-                'service',
-                'authzid'
-            )
-        );
-    }
-
-    /**
      * @expectedException \Fabiang\Sasl\Exception\InvalidArgumentException
      * @covers ::getResponse
      * @covers ::parseChallenge
