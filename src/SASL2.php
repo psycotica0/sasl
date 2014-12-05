@@ -118,5 +118,3 @@ class SASL2
         return $obj;
     }
 }
-
-

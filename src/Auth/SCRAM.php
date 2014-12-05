@@ -49,6 +49,7 @@
 namespace Fabiang\Sasl\Auth;
 
 use Fabiang\Sasl\Auth\Common;
+use Fabiang\Sasl\Exception\InvalidArgumentException;
 
 class SCRAM extends Common
 {
@@ -288,10 +289,10 @@ class SCRAM extends Common
     {
         // TODO: I reused the nonce function from the DigestMD5 class.
         // I should probably make this a protected function in Common.
-        if (@file_exists('/dev/urandom') && $fd = @fopen('/dev/urandom', 'r')) {
+        if (file_exists('/dev/urandom') && $fd = fopen('/dev/urandom', 'r')) {
             return base64_encode(fread($fd, 32));
 
-        } elseif (@file_exists('/dev/random') && $fd = @fopen('/dev/random', 'r')) {
+        } elseif (file_exists('/dev/random') && $fd = fopen('/dev/random', 'r')) {
             return base64_encode(fread($fd, 32));
 
         } else {
@@ -305,5 +306,3 @@ class SCRAM extends Common
     }
 
 }
-
-?>

@@ -46,6 +46,7 @@
 namespace Fabiang\Sasl\Auth;
 
 use Fabiang\Sasl\Auth\Common;
+use Fabiang\Sasl\Exception\InvalidArgumentException;
 
 class DigestMD5 extends Common
 {
@@ -141,7 +142,7 @@ class DigestMD5 extends Common
         }
 
         // Required: nonce, algorithm
-        if (empty($tokens['nonce']) OR empty($tokens['algorithm'])) {
+        if (empty($tokens['nonce']) || empty($tokens['algorithm'])) {
             return array();
         }
 
@@ -196,4 +197,3 @@ class DigestMD5 extends Common
         }
     }
 }
-?>
