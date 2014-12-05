@@ -1,4 +1,5 @@
 <?php
+
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2002-2003 Richard Heyes                                 |
 // | All rights reserved.                                                  |
@@ -35,13 +36,13 @@
 // $Id$
 
 /**
-* Implmentation of ANONYMOUS SASL mechanism
-*
-* @author  Richard Heyes <richard@php.net>
-* @access  public
-* @version 1.0
-* @package Auth_SASL2
-*/
+ * Implmentation of ANONYMOUS SASL mechanism
+ *
+ * @author  Richard Heyes <richard@php.net>
+ * @access  public
+ * @version 1.0
+ * @package Auth_SASL2
+ */
 
 namespace Fabiang\Sasl\Auth;
 
@@ -49,6 +50,7 @@ use Fabiang\Sasl\Auth\Common;
 
 class Anonymous extends Common
 {
+
     /**
      * Not much to do here except return the token supplied.
      * No encoding, hashing or encryption takes place for this

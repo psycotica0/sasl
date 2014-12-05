@@ -1,4 +1,5 @@
 <?php
+
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2002-2003 Richard Heyes                                 |
 // | All rights reserved.                                                  |
@@ -35,13 +36,13 @@
 // $Id$
 
 /**
-* Implmentation of PLAIN SASL mechanism
-*
-* @author  Richard Heyes <richard@php.net>
-* @access  public
-* @version 1.0
-* @package Auth_SASL2
-*/
+ * Implmentation of PLAIN SASL mechanism
+ *
+ * @author  Richard Heyes <richard@php.net>
+ * @access  public
+ * @version 1.0
+ * @package Auth_SASL2
+ */
 
 namespace Fabiang\Sasl\Auth;
 
@@ -49,14 +50,15 @@ use Fabiang\Sasl\Auth\Common;
 
 class Plain extends Common
 {
+
     /**
-    * Returns PLAIN response
-    *
-    * @param  string $authcid   Authentication id (username)
-    * @param  string $pass      Password
-    * @param  string $authzid   Autorization id
-    * @return string            PLAIN Response
-    */
+     * Returns PLAIN response
+     *
+     * @param  string $authcid   Authentication id (username)
+     * @param  string $pass      Password
+     * @param  string $authzid   Autorization id
+     * @return string            PLAIN Response
+     */
     function getResponse($authcid, $pass, $authzid = '')
     {
         return $authzid . chr(0) . $authcid . chr(0) . $pass;

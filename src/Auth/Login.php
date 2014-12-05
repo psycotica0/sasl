@@ -1,4 +1,5 @@
 <?php
+
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2002-2003 Richard Heyes                                 |
 // | All rights reserved.                                                  |
@@ -35,16 +36,16 @@
 // $Id$
 
 /**
-* This is technically not a SASL mechanism, however
-* it's used by Net_Sieve, Net_Cyrus and potentially
-* other protocols , so here is a good place to abstract
-* it.
-*
-* @author  Richard Heyes <richard@php.net>
-* @access  public
-* @version 1.0
-* @package Auth_SASL2
-*/
+ * This is technically not a SASL mechanism, however
+ * it's used by Net_Sieve, Net_Cyrus and potentially
+ * other protocols , so here is a good place to abstract
+ * it.
+ *
+ * @author  Richard Heyes <richard@php.net>
+ * @access  public
+ * @version 1.0
+ * @package Auth_SASL2
+ */
 
 namespace Fabiang\Sasl\Auth;
 
@@ -52,13 +53,14 @@ use Fabiang\Sasl\Auth\Common;
 
 class Login extends Common
 {
+
     /**
-    * Pseudo SASL LOGIN mechanism
-    *
-    * @param  string $user Username
-    * @param  string $pass Password
-    * @return string       LOGIN string
-    */
+     * Pseudo SASL LOGIN mechanism
+     *
+     * @param  string $user Username
+     * @param  string $pass Password
+     * @return string       LOGIN string
+     */
     function getResponse($user, $pass)
     {
         return sprintf('LOGIN %s %s', $user, $pass);

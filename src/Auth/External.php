@@ -1,4 +1,5 @@
 <?php
+
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2008 Christoph Schulz                                   |
 // | All rights reserved.                                                  |
@@ -35,13 +36,13 @@
 // $Id$
 
 /**
-* Implmentation of EXTERNAL SASL mechanism
-*
-* @author  Christoph Schulz <develop@kristov.de>
-* @access  public
-* @version 1.0.3
-* @package Auth_SASL2
-*/
+ * Implmentation of EXTERNAL SASL mechanism
+ *
+ * @author  Christoph Schulz <develop@kristov.de>
+ * @access  public
+ * @version 1.0.3
+ * @package Auth_SASL2
+ */
 
 namespace Fabiang\Sasl\Auth;
 
@@ -49,14 +50,15 @@ use Fabiang\Sasl\Auth\Common;
 
 class External extends Common
 {
+
     /**
-    * Returns EXTERNAL response
-    *
-    * @param  string $authcid   Authentication id (username)
-    * @param  string $pass      Password
-    * @param  string $authzid   Autorization id
-    * @return string            EXTERNAL Response
-    */
+     * Returns EXTERNAL response
+     *
+     * @param  string $authcid   Authentication id (username)
+     * @param  string $pass      Password
+     * @param  string $authzid   Autorization id
+     * @return string            EXTERNAL Response
+     */
     function getResponse($authcid, $pass, $authzid = '')
     {
         return $authzid;

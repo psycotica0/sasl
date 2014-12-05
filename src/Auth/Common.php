@@ -1,4 +1,5 @@
 <?php
+
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2002-2003 Richard Heyes                                 |
 // | All rights reserved.                                                  |
@@ -35,29 +36,29 @@
 // $Id$
 
 /**
-* Common functionality to SASL mechanisms
-*
-* @author  Richard Heyes <richard@php.net>
-* @access  public
-* @version 1.0
-* @package Auth_SASL2
-*/
-
+ * Common functionality to SASL mechanisms
+ *
+ * @author  Richard Heyes <richard@php.net>
+ * @access  public
+ * @version 1.0
+ * @package Auth_SASL2
+ */
 
 namespace Fabiang\Sasl\Auth;
 
 class Common
 {
+
     /**
-    * Function which implements HMAC MD5 digest
-    *
-    * @param  string $key  The secret key
-    * @param  string $data The data to hash
-    * @param  bool $raw_output Whether the digest is returned in binary or hexadecimal format.
-    *
-    * @return string       The HMAC-MD5 digest
-    */
-    function _HMAC_MD5($key, $data, $raw_output = FALSE)
+     * Function which implements HMAC MD5 digest
+     *
+     * @param  string $key  The secret key
+     * @param  string $data The data to hash
+     * @param  bool $raw_output Whether the digest is returned in binary or hexadecimal format.
+     *
+     * @return string       The HMAC-MD5 digest
+     */
+    protected function hmacMd5($key, $data, $raw_output = FALSE)
     {
         if (strlen($key) > 64) {
             $key = pack('H32', md5($key));
@@ -77,16 +78,16 @@ class Common
     }
 
     /**
-    * Function which implements HMAC-SHA-1 digest
-    *
-    * @param  string $key  The secret key
-    * @param  string $data The data to hash
-    * @param  bool $raw_output Whether the digest is returned in binary or hexadecimal format.
-    * @return string       The HMAC-SHA-1 digest
-    * @author Jehan <jehan.marmottard@gmail.com>
-    * @access protected
-    */
-    protected function _HMAC_SHA1($key, $data, $raw_output = FALSE)
+     * Function which implements HMAC-SHA-1 digest
+     *
+     * @param  string $key  The secret key
+     * @param  string $data The data to hash
+     * @param  bool $raw_output Whether the digest is returned in binary or hexadecimal format.
+     * @return string       The HMAC-SHA-1 digest
+     * @author Jehan <jehan.marmottard@gmail.com>
+     * @access protected
+     */
+    protected function hmacSha1($key, $data, $raw_output = FALSE)
     {
         if (strlen($key) > 64) {
             $key = sha1($key, TRUE);
@@ -102,6 +103,6 @@ class Common
         $inner  = pack('H40', sha1($k_ipad . $data));
         $digest = sha1($k_opad . $inner, $raw_output);
 
-         return $digest;
-     }
+        return $digest;
+    }
 }
