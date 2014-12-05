@@ -105,4 +105,25 @@ abstract class AbstractAuthentication
 
         return $digest;
     }
+
+    /**
+     * Creates the client nonce for the response
+     *
+     * @return string The cnonce value
+     */
+    protected function generateCnonce()
+    {
+        foreach (array('/dev/urandom', '/dev/random') as $file) {
+            if (is_readable($file)) {
+                return base64_encode(file_get_contents($file, false, null, -1, 32));
+            }
+        }
+
+        $str = '';
+        for ($i = 0; $i < 32; $i++) {
+            $str .= chr(mt_rand(0, 255));
+        }
+
+        return base64_encode($str);
+    }
 }

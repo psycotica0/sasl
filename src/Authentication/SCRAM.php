@@ -55,6 +55,14 @@ use Fabiang\Sasl\Exception\InvalidArgumentException;
 class SCRAM extends AbstractAuthentication implements AuthenticationInterface
 {
 
+    private $hash;
+    private $hmac;
+    private $gs2_header;
+    private $cnonce;
+    private $first_message_bare;
+    private $saltedPassword;
+    private $authMessage;
+
     /**
      * Construct a SCRAM-H client where 'H' is a cryptographic hash function.
      *
@@ -63,29 +71,32 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      * @link http://www.iana.org/assignments/hash-function-text-names/hash-function-text-names.xml "Hash Function Textual
      * Names"
      * format of core PHP hash function.
-     * @access public
      * @throws InvalidArgumentException
      */
-    function __construct($hash)
+    public function __construct($hash)
     {
         // Though I could be strict, I will actually also accept the naming used in the PHP core hash framework.
         // For instance "sha1" is accepted, while the registered hash name should be "SHA-1".
         $hash   = strtolower($hash);
-        $hashes = array('md2'     => 'md2',
+        $hashes = array(
+            'md2'     => 'md2',
             'md5'     => 'md5',
             'sha-1'   => 'sha1',
             'sha1'    => 'sha1',
-            'sha-224' > 'sha224',
-            'sha224' > 'sha224',
+            'sha-224' => 'sha224',
+            'sha224'  => 'sha224',
             'sha-256' => 'sha256',
             'sha256'  => 'sha256',
             'sha-384' => 'sha384',
             'sha384'  => 'sha384',
             'sha-512' => 'sha512',
-            'sha512'  => 'sha512');
+            'sha512'  => 'sha512'
+        );
+
         if (function_exists('hash_hmac') && isset($hashes[$hash])) {
-            $this->hash = create_function('$data', 'return hash("' . $hashes[$hash] . '", $data, true);');
-            $this->hmac = create_function('$key,$str,$raw', 'return hash_hmac("' . $hashes[$hash] . '", $str, $key, $raw);');
+            $hashAlgo = $hashes[$hash];
+            $this->hash = create_function('$data', 'return hash("' . $hashAlgo . '", $data, true);');
+            $this->hmac = create_function('$key,$str,$raw', 'return hash_hmac("' . $hashAlgo . '", $str, $key, $raw);');
         } elseif ($hash == 'md5') {
             $this->hash = create_function('$data', 'return md5($data, true);');
             $this->hmac = array($this, 'hmacMd5');
@@ -106,7 +117,6 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      * If the challenge is null or an empty string, the result will be the "initial response".
      * @param  string $authzid   Authorization id (username to proxy as)
      * @return string|false      The response (binary, NOT base64 encoded)
-     * @access public
      */
     public function getResponse($authcid, $pass, $challenge = null, $authzid = null)
     {
@@ -116,9 +126,6 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         }
         if (!empty($authzid)) {
             $authzid = $this->formatName($authzid);
-            if (empty($authzid)) {
-                return false;
-            }
         }
 
         if (empty($challenge)) {
@@ -133,7 +140,6 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      *
      * @param string $username a name to be prepared.
      * @return string the reformated name.
-     * @access private
      */
     private function formatName($username)
     {
@@ -152,7 +158,6 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      * @param string $authcid Prepared authentication identity.
      * @param string $authzid Prepared authorization identity.
      * @return string The SCRAM response to send.
-     * @access private
      */
     private function generateInitialResponse($authcid, $authzid)
     {
@@ -160,7 +165,8 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         $this->gs2_header = $gs2_cbind_flag . (!empty($authzid) ? 'a=' . $authzid : '') . ',';
 
         // I must generate a client nonce and "save" it for later comparison on second response.
-        $this->cnonce             = $this->getCnonce();
+        $this->cnonce  = $this->generateCnonce();
+
         // XXX: in the future, when mandatory and/or optional extensions are defined in any updated RFC,
         // this message can be updated.
         $this->first_message_bare = 'n=' . $authcid . ',r=' . $this->cnonce;
@@ -173,10 +179,10 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      * @param  string $challenge The SCRAM challenge
      * @return string|false      The response to send; false in case of wrong challenge or if an initial response has not
      * been generated first.
-     * @access private
      */
     private function generateResponse($challenge, $password)
     {
+        $matches = array();
         // XXX: as I don't support mandatory extension, I would fail on them.
         // And I simply ignore any optional extension.
         $server_message_regexp = "#^r=([\x21-\x2B\x2D-\x7E]+),s=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9]{2}==)?),i=([0-9]*)(,[A-Za-z]=[^,])*$#";
@@ -192,7 +198,7 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         $i = intval($matches[3]);
 
         $cnonce = substr($nonce, 0, strlen($this->cnonce));
-        if ($cnonce <> $this->cnonce) {
+        if ($cnonce !== $this->cnonce) {
             // Invalid challenge! Are we under attack?
             return false;
         }
@@ -214,6 +220,25 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     }
 
     /**
+     * Hi() call, which is essentially PBKDF2 (RFC-2898) with HMAC-H() as the pseudorandom function.
+     *
+     * @param string $str  The string to hash.
+     * @param string $salt The salt value.
+     * @param int $i The   iteration count.
+     */
+    private function hi($str, $salt, $i)
+    {
+        $int1   = "\0\0\0\1";
+        $ui     = call_user_func($this->hmac, $str, $salt . $int1, true);
+        $result = $ui;
+        for ($k = 1; $k < $i; $k++) {
+            $ui     = call_user_func($this->hmac, $str, $ui, true);
+            $result = $result ^ $ui;
+        }
+        return $result;
+    }
+
+    /**
      * SCRAM has also a server verification step. On a successful outcome, it will send additional data which must
      * absolutely be checked against this function. If this fails, the entity which we are communicating with is probably
      * not the server as it has not access to your ServerKey.
@@ -221,7 +246,6 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      * @param string $data The additional data sent along a successful outcome.
      * @return bool Whether the server has been authenticated.
      * If false, the client must close the connection and consider to be under a MITM attack.
-     * @access public
      */
     public function processOutcome($data)
     {
@@ -239,47 +263,20 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     }
 
     /**
-     * Hi() call, which is essentially PBKDF2 (RFC-2898) with HMAC-H() as the pseudorandom function.
-     *
-     * @param string $str The string to hash.
-     * @param string $hash The hash value.
-     * @param int $i The iteration count.
-     * @access private
+     * @return string
      */
-    private function hi($str, $salt, $i)
+    public function getCnonce()
     {
-        $int1   = "\0\0\0\1";
-        $ui     = call_user_func($this->hmac, $str, $salt . $int1, true);
-        $result = $ui;
-        for ($k = 1; $k < $i; $k++) {
-            $ui     = call_user_func($this->hmac, $str, $ui, true);
-            $result = $result ^ $ui;
-        }
-        return $result;
+        return $this->cnonce;
     }
 
-    /**
-     * Creates the client nonce for the response
-     *
-     * @return string  The cnonce value
-     * @access private
-     * @author  Richard Heyes <richard@php.net>
-     */
-    private function getCnonce()
+    public function getSaltedPassword()
     {
-        // TODO: I reused the nonce function from the DigestMD5 class.
-        // I should probably make this a protected function in Common.
-        if (file_exists('/dev/urandom') && $fd = fopen('/dev/urandom', 'r')) {
-            return base64_encode(fread($fd, 32));
-        } elseif (file_exists('/dev/random') && $fd = fopen('/dev/random', 'r')) {
-            return base64_encode(fread($fd, 32));
-        } else {
-            $str = '';
-            for ($i = 0; $i < 32; $i++) {
-                $str .= chr(mt_rand(0, 255));
-            }
+        return $this->saltedPassword;
+    }
 
-            return base64_encode($str);
-        }
+    public function getAuthMessage()
+    {
+        return $this->authMessage;
     }
 }

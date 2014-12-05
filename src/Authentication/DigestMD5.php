@@ -48,7 +48,7 @@ namespace Fabiang\Sasl\Authentication;
 
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
-class DigestMD5 implements AuthenticationInterface
+class DigestMD5 extends AbstractAuthentication implements AuthenticationInterface
 {
 
     /**
@@ -74,7 +74,7 @@ class DigestMD5 implements AuthenticationInterface
         }
 
         if (!empty($parsedChallenge)) {
-            $cnonce         = $this->getCnonce();
+            $cnonce         = $this->generateCnonce();
             $digestUri      = sprintf('%s/%s', $service, $hostname);
             $responseValue = $this->getResponseValue(
                 $authcid,
@@ -213,28 +213,5 @@ class DigestMD5 implements AuthenticationInterface
         }
         $A2 = 'AUTHENTICATE:' . $digest_uri;
         return md5(sprintf('%s:%s:00000001:%s:auth:%s', md5($A1), $nonce, $cnonce, md5($A2)));
-    }
-
-    /**
-     * Creates the client nonce for the response
-     *
-     * @return string  The cnonce value
-     * @access private
-     */
-    private function getCnonce()
-    {
-        foreach (array('/dev/urandom', '/dev/random') as $file) {
-            if (is_readable($file)) {
-                return base64_encode(file_get_contents($file, false, null, -1, 32));
-            }
-        }
-
-        $str = '';
-        for ($i = 0; $i < 32; $i++) {
-            $str .= chr(mt_rand(0, 255));
-        }
-
-        return base64_encode($str);
-
     }
 }

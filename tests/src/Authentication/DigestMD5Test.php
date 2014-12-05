@@ -28,7 +28,7 @@ class DigestMD5Test extends \PHPUnit_Framework_TestCase
      * @covers ::getResponse
      * @covers ::parseChallenge
      * @covers ::getResponseValue
-     * @covers ::getCnonce
+     * @covers ::generateCnonce
      * @covers ::trim
      */
     public function testGetResponseRealm()
@@ -51,7 +51,7 @@ class DigestMD5Test extends \PHPUnit_Framework_TestCase
      * @covers ::getResponse
      * @covers ::parseChallenge
      * @covers ::getResponseValue
-     * @covers ::getCnonce
+     * @covers ::generateCnonce
      * @covers ::trim
      */
     public function testGetResponseNoRealm()
@@ -74,7 +74,7 @@ class DigestMD5Test extends \PHPUnit_Framework_TestCase
      * @covers ::getResponse
      * @covers ::parseChallenge
      * @covers ::getResponseValue
-     * @covers ::getCnonce
+     * @covers ::generateCnonce
      * @covers ::trim
      */
     public function testGetResponseNoAuthzid()
