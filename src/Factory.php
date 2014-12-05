@@ -48,7 +48,7 @@ namespace Fabiang\Sasl;
 
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
-class Sasl
+class Factory
 {
 
     /**
