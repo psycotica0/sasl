@@ -67,26 +67,60 @@ class DigestMD5 implements AuthenticationInterface
      */
     function getResponse($authcid, $pass, $challenge, $hostname, $service, $authzid = '')
     {
-        $challenge      = $this->parseChallenge($challenge);
-        $authzid_string = '';
+        $parsedChallenge = $this->parseChallenge($challenge);
+        $authzidString = '';
         if ($authzid != '') {
-            $authzid_string = ',authzid="' . $authzid . '"';
+            $authzidString = ',authzid="' . $authzid . '"';
         }
 
-        if (!empty($challenge)) {
+        if (!empty($parsedChallenge)) {
             $cnonce         = $this->getCnonce();
-            $digest_uri     = sprintf('%s/%s', $service, $hostname);
-            $response_value = $this->getResponseValue($authcid, $pass, $challenge['realm'], $challenge['nonce'], $cnonce, $digest_uri, $authzid);
+            $digestUri      = sprintf('%s/%s', $service, $hostname);
+            $responseValue = $this->getResponseValue(
+                $authcid,
+                $pass,
+                $parsedChallenge['realm'],
+                $parsedChallenge['nonce'],
+                $cnonce,
+                $digestUri,
+                $authzid
+            );
 
-            if ($challenge['realm']) {
-                return sprintf('username="%s",realm="%s"' . $authzid_string .
-                        ',nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",response=%s,maxbuf=%d', $authcid, $challenge['realm'], $challenge['nonce'], $cnonce, $digest_uri, $response_value, $challenge['maxbuf']);
+            if ($parsedChallenge['realm']) {
+                $realm = $parsedChallenge['realm'];
+
+                // concat multiple realsm together.
+                if (is_array($realm)) {
+                    $realm = implode('",realm="', $realm);
+                }
+
+                return sprintf(
+                    'username="%s",realm="%s"%s,nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",'
+                    . 'response=%s,maxbuf=%d',
+                    $authcid,
+                    $realm,
+                    $authzidString,
+                    $parsedChallenge['nonce'],
+                    $cnonce,
+                    $digestUri,
+                    $responseValue,
+                    $parsedChallenge['maxbuf']
+                );
             } else {
-                return sprintf('username="%s"' . $authzid_string . ',nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",response=%s,maxbuf=%d', $authcid, $challenge['nonce'], $cnonce, $digest_uri, $response_value, $challenge['maxbuf']);
+                return sprintf(
+                    'username="%s"%s,nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",response=%s,maxbuf=%d',
+                    $authcid,
+                    $authzidString,
+                    $parsedChallenge['nonce'],
+                    $cnonce,
+                    $digestUri,
+                    $responseValue,
+                    $parsedChallenge['maxbuf']
+                );
             }
-        } else {
-            throw new InvalidArgumentException('Invalid digest challenge');
         }
+
+        throw new InvalidArgumentException('Invalid digest challenge');
     }
 
     /**
@@ -99,33 +133,36 @@ class DigestMD5 implements AuthenticationInterface
      */
     private function parseChallenge($challenge)
     {
-        $tokens = array();
-        while (preg_match('/^([a-z-]+)=("[^"]+(?<!\\\)"|[^,]+)/i', $challenge, $matches)) {
+        $tokens  = array();
+        $matches = array();
+        while (preg_match('/^(?<key>[a-z-]+)=(?<value>"[^"]+(?<!\\\)"|[^,]+)/i', $challenge, $matches)) {
+            $match = $matches[0];
+            $key   = $matches['key'];
+            $value = $matches['value'];
 
             // Ignore these as per rfc2831
-            if ($matches[1] == 'opaque' || $matches[1] == 'domain') {
-                $challenge = substr($challenge, strlen($matches[0]) + 1);
+            if ($key == 'opaque' || $key == 'domain') {
+                $challenge = substr($challenge, strlen($match) + 1);
                 continue;
             }
 
             // Allowed multiple "realm" and "auth-param"
-            if (!empty($tokens[$matches[1]]) && ($matches[1] == 'realm' OR $matches[1] == 'auth-param')) {
-                if (is_array($tokens[$matches[1]])) {
-                    $tokens[$matches[1]][] = preg_replace('/^"(.*)"$/', '\\1', $matches[2]);
+            if (!empty($tokens[$key]) && ($key == 'realm' || $key == 'auth-param')) {
+                if (is_array($tokens[$key])) {
+                    $tokens[$key][] = $this->trim($value);
                 } else {
-                    $tokens[$matches[1]] = array($tokens[$matches[1]], preg_replace('/^"(.*)"$/', '\\1', $matches[2]));
+                    $tokens[$key] = array($tokens[$key], $this->trim($value));
                 }
 
-                // Any other multiple instance = failure
-            } elseif (!empty($tokens[$matches[1]])) {
-                $tokens = array();
-                break;
+            // Any other multiple instance = failure
+            } elseif (!empty($tokens[$key])) {
+                return array();
             } else {
-                $tokens[$matches[1]] = preg_replace('/^"(.*)"$/', '\\1', $matches[2]);
+                $tokens[$key] = $this->trim($value);
             }
 
             // Remove the just parsed directive from the challenge
-            $challenge = substr($challenge, strlen($matches[0]) + 1);
+            $challenge = substr($challenge, strlen($match) + 1);
         }
 
         /**
@@ -147,6 +184,16 @@ class DigestMD5 implements AuthenticationInterface
         }
 
         return $tokens;
+    }
+
+    /**
+     *
+     * @param string $string
+     * @return string
+     */
+    private function trim($string)
+    {
+        return trim($string, '"');
     }
 
     /**
@@ -181,17 +228,18 @@ class DigestMD5 implements AuthenticationInterface
      */
     private function getCnonce()
     {
-        if (file_exists('/dev/urandom') && $fd = fopen('/dev/urandom', 'r')) {
-            return base64_encode(fread($fd, 32));
-        } elseif (file_exists('/dev/random') && $fd = fopen('/dev/random', 'r')) {
-            return base64_encode(fread($fd, 32));
-        } else {
-            $str = '';
-            for ($i = 0; $i < 32; $i++) {
-                $str .= chr(mt_rand(0, 255));
+        foreach (array('/dev/urandom', '/dev/random') as $file) {
+            if (is_readable($file)) {
+                return base64_encode(file_get_contents($file, false, null, -1, 32));
             }
-
-            return base64_encode($str);
         }
+
+        $str = '';
+        for ($i = 0; $i < 32; $i++) {
+            $str .= chr(mt_rand(0, 255));
+        }
+
+        return base64_encode($str);
+
     }
 }
