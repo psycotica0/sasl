@@ -46,9 +46,9 @@
 * @package Auth_SASL2
 */
 
-namespace SASL2\Auth;
+namespace Fabiang\Sasl\Auth;
 
-use SASL2\Auth\Common;
+use Fabiang\Sasl\Auth\Common;
 
 class Login extends Common
 {

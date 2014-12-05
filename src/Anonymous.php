@@ -35,7 +35,7 @@
 // $Id$
 
 /**
-* Implmentation of PLAIN SASL mechanism
+* Implmentation of ANONYMOUS SASL mechanism
 *
 * @author  Richard Heyes <richard@php.net>
 * @access  public
@@ -43,23 +43,31 @@
 * @package Auth_SASL2
 */
 
-namespace SASL2\Auth;
+namespace Fabiang\Sasl\Auth;
 
-use SASL2\Auth\Common;
+use Fabiang\Sasl\Auth\Common;
 
-class Plain extends Common
+class Anonymous extends Common
 {
     /**
-    * Returns PLAIN response
-    *
-    * @param  string $authcid   Authentication id (username)
-    * @param  string $pass      Password
-    * @param  string $authzid   Autorization id
-    * @return string            PLAIN Response
-    */
-    function getResponse($authcid, $pass, $authzid = '')
+     * Not much to do here except return the token supplied.
+     * No encoding, hashing or encryption takes place for this
+     * mechanism, simply one of:
+     *  o An email address
+     *  o An opaque string not containing "@" that can be interpreted
+     *    by the sysadmin
+     *  o Nothing
+     *
+     * We could have some logic here for the second option, but this
+     * would by no means create something interpretable.
+     *
+     * @param  string $token Optional email address or string to provide
+     *                       as trace information.
+     * @return string        The unaltered input token
+     */
+    public function getResponse($token = '')
     {
-        return $authzid . chr(0) . $authcid . chr(0) . $pass;
+        return $token;
     }
 }
-?>
+

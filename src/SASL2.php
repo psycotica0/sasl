@@ -43,15 +43,15 @@
 * @package Auth_SASL2
 */
 
-namespace SASL2;
+namespace Fabiang\Sasl;
 
-use SASL2\Auth\Anonymous;
-use SASL2\Auth\Login;
-use SASL2\Auth\Plain;
-use SASL2\Auth\External;
-use SASL2\Auth\CramMD5;
-use SASL2\Auth\DigestMD5;
-use SASL2\Auth\SCRAM;
+use Fabiang\Sasl\Auth\Anonymous;
+use Fabiang\Sasl\Auth\Login;
+use Fabiang\Sasl\Auth\Plain;
+use Fabiang\Sasl\Auth\External;
+use Fabiang\Sasl\Auth\CramMD5;
+use Fabiang\Sasl\Auth\DigestMD5;
+use Fabiang\Sasl\Auth\SCRAM;
 
 class SASL2
 {

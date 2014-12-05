@@ -43,9 +43,9 @@
 * @package Auth_SASL
 */
 
-namespace SASL2\Auth;
+namespace Fabiang\Sasl\Auth;
 
-use SASL2\Auth\Common;
+use Fabiang\Sasl\Auth\Common;
 
 class DigestMD5 extends Common
 {

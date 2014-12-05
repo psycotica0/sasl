@@ -44,7 +44,7 @@
 */
 
 
-namespace SASL2\Auth;
+namespace Fabiang\Sasl\Auth;
 
 class Common
 {
