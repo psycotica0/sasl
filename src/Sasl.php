@@ -1,4 +1,5 @@
 <?php
+
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2002-2003 Richard Heyes                                 |
 // | All rights reserved.                                                  |
@@ -35,34 +36,35 @@
 // $Id$
 
 /**
-* Client implementation of various SASL mechanisms
-*
-* @author  Richard Heyes <richard@php.net>
-* @access  public
-* @version 1.0
-* @package Auth_SASL2
-*/
+ * Client implementation of various SASL mechanisms
+ *
+ * @author  Richard Heyes <richard@php.net>
+ * @access  public
+ * @version 1.0
+ * @package Auth_SASL2
+ */
 
 namespace Fabiang\Sasl;
 
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
-class SASL2
+class Sasl
 {
+
     /**
-    * Factory class. Returns an object of the request
-    * type.
-    *
-    * @param string $type One of: Anonymous
-    *                             Plain
-    *                             CramMD5
-    *                             DigestMD5
-    *                             SCRAM-* (any mechanism of the SCRAM family)
-    *                     Types are not case sensitive
-    */
-    function factory($type)
+     * Factory class. Returns an object of the request
+     * type.
+     *
+     * @param string $type One of: Anonymous
+     *                             Plain
+     *                             CramMD5
+     *                             DigestMD5
+     *                             SCRAM-* (any mechanism of the SCRAM family)
+     *                     Types are not case sensitive
+     */
+    public function factory($type)
     {
-        $classname = 'SASL2\Auth\\';
+        $classname = 'Fabiang\\Sasl\Auth\\';
         switch (strtolower($type)) {
             case 'anonymous':
                 $classname .= 'Anonymous';
@@ -81,15 +83,15 @@ class SASL2
                 break;
 
             case 'crammd5':
-                // $msg = 'Deprecated mechanism name. Use IANA-registered name: CRAM-MD5.';
-                // trigger_error($msg, E_USER_DEPRECATED);
+            // $msg = 'Deprecated mechanism name. Use IANA-registered name: CRAM-MD5.';
+            // trigger_error($msg, E_USER_DEPRECATED);
             case 'cram-md5':
                 $classname .= 'CramMD5';
                 break;
 
             case 'digestmd5':
-                // $msg = 'Deprecated mechanism name. Use IANA-registered name: DIGEST-MD5.';
-                // trigger_error($msg, E_USER_DEPRECATED);
+            // $msg = 'Deprecated mechanism name. Use IANA-registered name: DIGEST-MD5.';
+            // trigger_error($msg, E_USER_DEPRECATED);
             case 'digest-md5':
                 // $msg = 'DIGEST-MD5 is a deprecated SASL mechanism as per RFC-6331. Using it could be a security risk.';
                 // trigger_error($msg, E_USER_NOTICE);
@@ -98,9 +100,8 @@ class SASL2
 
             default:
                 $scram = '/^SCRAM-(.{1,9})$/i';
-                if (preg_match($scram, $type, $matches))
-                {
-                    $hash = $matches[1];
+                if (preg_match($scram, $type, $matches)) {
+                    $hash      = $matches[1];
                     $classname .= 'SCRAM';
                     $parameter = $hash;
                     break;

@@ -18,5 +18,5 @@ tools:
     sensiolabs_security_checker: true
     php_changetracking: true
     external_code_coverage:
-        runs: 3
+        runs: 1
         timeout: 1200
