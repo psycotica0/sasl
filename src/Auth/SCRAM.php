@@ -84,7 +84,7 @@ class SCRAM extends Common
             'sha-512' => 'sha512',
             'sha512'  => 'sha512');
         if (function_exists('hash_hmac') && isset($hashes[$hash])) {
-            $this->hash = create_function('$data', 'return hash("' . $hashes[$hash] . '", $data, TRUE);');
+            $this->hash = create_function('$data', 'return hash("' . $hashes[$hash] . '", $data, true);');
             $this->hmac = create_function('$key,$str,$raw', 'return hash_hmac("' . $hashes[$hash] . '", $str, $key, $raw);');
         } elseif ($hash == 'md5') {
             $this->hash = create_function('$data', 'return md5($data, true);');
@@ -103,12 +103,12 @@ class SCRAM extends Common
      * @param  string $authcid   Authentication id (username)
      * @param  string $pass      Password
      * @param  string $challenge The challenge sent by the server.
-     * If the challenge is NULL or an empty string, the result will be the "initial response".
+     * If the challenge is null or an empty string, the result will be the "initial response".
      * @param  string $authzid   Authorization id (username to proxy as)
      * @return string|false      The response (binary, NOT base64 encoded)
      * @access public
      */
-    public function getResponse($authcid, $pass, $challenge = NULL, $authzid = NULL)
+    public function getResponse($authcid, $pass, $challenge = null, $authzid = null)
     {
         $authcid = $this->formatName($authcid);
         if (empty($authcid)) {
@@ -202,11 +202,11 @@ class SCRAM extends Common
         // TODO: $password = $this->normalize($password); // SASLprep profile of stringprep.
         $saltedPassword       = $this->hi($password, $salt, $i);
         $this->saltedPassword = $saltedPassword;
-        $clientKey            = call_user_func($this->hmac, $saltedPassword, "Client Key", TRUE);
-        $storedKey            = call_user_func($this->hash, $clientKey, TRUE);
+        $clientKey            = call_user_func($this->hmac, $saltedPassword, "Client Key", true);
+        $storedKey            = call_user_func($this->hash, $clientKey, true);
         $authMessage          = $this->first_message_bare . ',' . $challenge . ',' . $final_message;
         $this->authMessage    = $authMessage;
-        $clientSignature      = call_user_func($this->hmac, $storedKey, $authMessage, TRUE);
+        $clientSignature      = call_user_func($this->hmac, $storedKey, $authMessage, true);
         $clientProof          = $clientKey ^ $clientSignature;
         $proof                = ',p=' . base64_encode($clientProof);
 
@@ -234,7 +234,7 @@ class SCRAM extends Common
         $verifier                 = $matches[1];
         $proposed_serverSignature = base64_decode($verifier);
         $serverKey                = call_user_func($this->hmac, $this->saltedPassword, "Server Key", true);
-        $serverSignature          = call_user_func($this->hmac, $serverKey, $this->authMessage, TRUE);
+        $serverSignature          = call_user_func($this->hmac, $serverKey, $this->authMessage, true);
         return ($proposed_serverSignature === $serverSignature);
     }
 

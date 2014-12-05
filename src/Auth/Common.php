@@ -58,7 +58,7 @@ class Common
      *
      * @return string       The HMAC-MD5 digest
      */
-    protected function hmacMd5($key, $data, $raw_output = FALSE)
+    protected function hmacMd5($key, $data, $raw_output = false)
     {
         if (strlen($key) > 64) {
             $key = pack('H32', md5($key));
@@ -87,10 +87,10 @@ class Common
      * @author Jehan <jehan.marmottard@gmail.com>
      * @access protected
      */
-    protected function hmacSha1($key, $data, $raw_output = FALSE)
+    protected function hmacSha1($key, $data, $raw_output = false)
     {
         if (strlen($key) > 64) {
-            $key = sha1($key, TRUE);
+            $key = sha1($key, true);
         }
 
         if (strlen($key) < 64) {
