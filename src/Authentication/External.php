@@ -1,7 +1,7 @@
 <?php
 
 // +-----------------------------------------------------------------------+
-// | Copyright (c) 2002-2003 Richard Heyes                                 |
+// | Copyright (c) 2008 Christoph Schulz                                   |
 // | All rights reserved.                                                  |
 // |                                                                       |
 // | Redistribution and use in source and binary forms, with or without    |
@@ -30,42 +30,35 @@
 // | OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  |
 // |                                                                       |
 // +-----------------------------------------------------------------------+
-// | Author: Richard Heyes <richard@php.net>                               |
+// | Author: Christoph Schulz <develop@kristov.de>                         |
 // +-----------------------------------------------------------------------+
 //
 // $Id$
 
 /**
- * Implmentation of CRAM-MD5 SASL mechanism
+ * Implmentation of EXTERNAL SASL mechanism
  *
- * @author  Richard Heyes <richard@php.net>
+ * @author  Christoph Schulz <develop@kristov.de>
  * @access  public
- * @version 1.0
- * @package Auth_SASL
+ * @version 1.0.3
+ * @package Auth_SASL2
  */
 
-namespace Fabiang\Sasl\Auth;
+namespace Fabiang\Sasl\Authentication;
 
-use Fabiang\Sasl\Auth\Common;
-
-class CramMD5 extends Common
+class External implements AuthenticationInterface
 {
 
     /**
-     * Implements the CRAM-MD5 SASL mechanism
-     * This DOES NOT base64 encode the return value,
-     * you will need to do that yourself.
+     * Returns EXTERNAL response
      *
-     * @param string $user      Username
-     * @param string $pass      Password
-     * @param string $challenge The challenge supplied by the server.
-     *                          this should be already base64_decoded.
-     *
-     * @return string The string to pass back to the server, of the form
-     *                "<user> <digest>". This is NOT base64_encoded.
+     * @param  string $authcid   Authentication id (username)
+     * @param  string $pass      Password
+     * @param  string $authzid   Autorization id
+     * @return string            EXTERNAL Response
      */
-    function getResponse($user, $pass, $challenge)
+    function getResponse($authcid, $pass, $authzid = '')
     {
-        return $user . ' ' . $this->hmacMd5($pass, $challenge);
+        return $authzid;
     }
 }

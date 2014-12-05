@@ -36,7 +36,10 @@
 // $Id$
 
 /**
- * Common functionality to SASL mechanisms
+ * This is technically not a SASL mechanism, however
+ * it's used by Net_Sieve, Net_Cyrus and potentially
+ * other protocols , so here is a good place to abstract
+ * it.
  *
  * @author  Richard Heyes <richard@php.net>
  * @access  public
@@ -44,65 +47,20 @@
  * @package Auth_SASL2
  */
 
-namespace Fabiang\Sasl\Auth;
+namespace Fabiang\Sasl\Authentication;
 
-class Common
+class Login implements AuthenticationInterface
 {
 
     /**
-     * Function which implements HMAC MD5 digest
+     * Pseudo SASL LOGIN mechanism
      *
-     * @param  string $key  The secret key
-     * @param  string $data The data to hash
-     * @param  bool $raw_output Whether the digest is returned in binary or hexadecimal format.
-     *
-     * @return string       The HMAC-MD5 digest
+     * @param  string $user Username
+     * @param  string $pass Password
+     * @return string       LOGIN string
      */
-    protected function hmacMd5($key, $data, $raw_output = false)
+    function getResponse($user, $pass)
     {
-        if (strlen($key) > 64) {
-            $key = pack('H32', md5($key));
-        }
-
-        if (strlen($key) < 64) {
-            $key = str_pad($key, 64, chr(0));
-        }
-
-        $k_ipad = substr($key, 0, 64) ^ str_repeat(chr(0x36), 64);
-        $k_opad = substr($key, 0, 64) ^ str_repeat(chr(0x5C), 64);
-
-        $inner  = pack('H32', md5($k_ipad . $data));
-        $digest = md5($k_opad . $inner, $raw_output);
-
-        return $digest;
-    }
-
-    /**
-     * Function which implements HMAC-SHA-1 digest
-     *
-     * @param  string $key  The secret key
-     * @param  string $data The data to hash
-     * @param  bool $raw_output Whether the digest is returned in binary or hexadecimal format.
-     * @return string       The HMAC-SHA-1 digest
-     * @author Jehan <jehan.marmottard@gmail.com>
-     * @access protected
-     */
-    protected function hmacSha1($key, $data, $raw_output = false)
-    {
-        if (strlen($key) > 64) {
-            $key = sha1($key, true);
-        }
-
-        if (strlen($key) < 64) {
-            $key = str_pad($key, 64, chr(0));
-        }
-
-        $k_ipad = substr($key, 0, 64) ^ str_repeat(chr(0x36), 64);
-        $k_opad = substr($key, 0, 64) ^ str_repeat(chr(0x5C), 64);
-
-        $inner  = pack('H40', sha1($k_ipad . $data));
-        $digest = sha1($k_opad . $inner, $raw_output);
-
-        return $digest;
+        return sprintf('LOGIN %s %s', $user, $pass);
     }
 }

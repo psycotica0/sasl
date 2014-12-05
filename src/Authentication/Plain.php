@@ -1,7 +1,7 @@
 <?php
 
 // +-----------------------------------------------------------------------+
-// | Copyright (c) 2008 Christoph Schulz                                   |
+// | Copyright (c) 2002-2003 Richard Heyes                                 |
 // | All rights reserved.                                                  |
 // |                                                                       |
 // | Redistribution and use in source and binary forms, with or without    |
@@ -30,37 +30,35 @@
 // | OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  |
 // |                                                                       |
 // +-----------------------------------------------------------------------+
-// | Author: Christoph Schulz <develop@kristov.de>                         |
+// | Author: Richard Heyes <richard@php.net>                               |
 // +-----------------------------------------------------------------------+
 //
 // $Id$
 
 /**
- * Implmentation of EXTERNAL SASL mechanism
+ * Implmentation of PLAIN SASL mechanism
  *
- * @author  Christoph Schulz <develop@kristov.de>
+ * @author  Richard Heyes <richard@php.net>
  * @access  public
- * @version 1.0.3
+ * @version 1.0
  * @package Auth_SASL2
  */
 
-namespace Fabiang\Sasl\Auth;
+namespace Fabiang\Sasl\Authentication;
 
-use Fabiang\Sasl\Auth\Common;
-
-class External extends Common
+class Plain implements AuthenticationInterface
 {
 
     /**
-     * Returns EXTERNAL response
+     * Returns PLAIN response
      *
      * @param  string $authcid   Authentication id (username)
      * @param  string $pass      Password
      * @param  string $authzid   Autorization id
-     * @return string            EXTERNAL Response
+     * @return string            PLAIN Response
      */
     function getResponse($authcid, $pass, $authzid = '')
     {
-        return $authzid;
+        return $authzid . chr(0) . $authcid . chr(0) . $pass;
     }
 }

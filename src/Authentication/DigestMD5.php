@@ -44,12 +44,11 @@
  * @package Auth_SASL
  */
 
-namespace Fabiang\Sasl\Auth;
+namespace Fabiang\Sasl\Authentication;
 
-use Fabiang\Sasl\Auth\Common;
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
-class DigestMD5 extends Common
+class DigestMD5 implements AuthenticationInterface
 {
 
     /**

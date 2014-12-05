@@ -47,12 +47,12 @@
  * @package Auth_SASL2
  */
 
-namespace Fabiang\Sasl\Auth;
+namespace Fabiang\Sasl\Authentication;
 
-use Fabiang\Sasl\Auth\Common;
+use Fabiang\Sasl\Authentication\AbstractAuthentication;
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
-class SCRAM extends Common
+class SCRAM extends AbstractAuthentication implements AuthenticationInterface
 {
 
     /**
