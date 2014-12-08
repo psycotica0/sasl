@@ -81,7 +81,11 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function xmppServerSupportsAuthenticationMethod($authenticationMethod)
     {
         $data = $this->readStreamUntil('</features>');
-        Assert::assertContains("<mechanism>$authenticationMethod</mechanism>", $data);
+        if (false === strpos($data, "<mechanism>$authenticationMethod</mechanism>")) {
+            throw new PendingException(
+                "Skipped: Server does not support authentication method '$authenticationMethod'"
+            );
+        }
     }
 
     /**

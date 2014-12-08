@@ -9,3 +9,5 @@ default:
                     - precise32
                     - testuser
                     - testpass
+    testers:
+        strict: true
