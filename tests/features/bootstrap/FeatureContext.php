@@ -40,15 +40,15 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function __construct($hostname, $port, $domain, $username, $password)
     {
         $this->hostname = $hostname;
-        $this->port     = (int)$port;
+        $this->port     = (int) $port;
         $this->domain   = $domain;
         $this->username = $username;
         $this->password = $password;
     }
 
     /**
-      * @AfterScenario
-      */
+     * @AfterScenario
+     */
     public function closeConnection()
     {
         if ($this->stream) {
@@ -63,15 +63,15 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $errno  = null;
         $errstr = null;
-        $this->stream = stream_socket_client("tcp://{$this->hostname}:{$this->port}", $errno, $errstr, 10);
+
+        $this->stream = stream_socket_client("tcp://{$this->hostname}:{$this->port}", $errno, $errstr, 5);
         if (!$this->stream) {
             throw new \Exception("Coudn't connection to host {$this->hostname}");
         }
 
         fwrite(
-            $this->stream,
-                '<?xml version="1.0" encoding="UTF-8"?><stream:stream to="' . $this->domain
-                . '" xmlns:stream="http://etherx.jabber.org/streams" xmlns="jabber:client" version="1.0">'
+            $this->stream, '<?xml version="1.0" encoding="UTF-8"?><stream:stream to="' . $this->domain
+            . '" xmlns:stream="http://etherx.jabber.org/streams" xmlns="jabber:client" version="1.0">'
         );
     }
 
@@ -80,7 +80,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function xmppServerSupportsAuthenticationMethod($authenticationMethod)
     {
-        $data = fread($this->stream, 4096);
+        $data = $this->readStreamUntil('</features>');
         Assert::assertContains("<mechanism>$authenticationMethod</mechanism>", $data);
     }
 
@@ -92,10 +92,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $authenticationFactory = new Sasl;
 
         $this->authenticationObject = $authenticationFactory->factory($authenticationMethod);
-        $authenticationData = $this->authenticationObject->getResponse($this->username, $this->password);
+        $authenticationData         = $this->authenticationObject->getResponse($this->username, $this->password);
         fwrite(
-            $this->stream,
-            '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="'
+            $this->stream, '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="'
             . $authenticationMethod . '">' . base64_encode($authenticationData) . '</auth>'
         );
     }
@@ -107,5 +106,21 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $data = fread($this->stream, 4096);
         Assert::assertSame("<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>", $data);
+    }
+
+    private function readStreamUntil($until, $timeout = 5)
+    {
+        $readStart = time();
+        $data = '';
+        do {
+            $data .= fread($this->stream, 4096);
+
+            if (time() >= $readStart + $timeout) {
+                throw new \Exception('Timeout when trying to receive buffer');
+            }
+
+        } while (strpos($data, $until));
+
+        return $data;
     }
 }
