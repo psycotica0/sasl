@@ -48,7 +48,7 @@ namespace Fabiang\Sasl;
 
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
-class Factory
+class Sasl
 {
 
     /**
@@ -64,7 +64,7 @@ class Factory
      */
     public function factory($type)
     {
-        $classname = 'Fabiang\\Sasl\Auth\\';
+        $classname = 'Fabiang\\Sasl\Authentication\\';
         switch (strtolower($type)) {
             case 'anonymous':
                 $classname .= 'Anonymous';
