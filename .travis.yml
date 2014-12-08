@@ -16,7 +16,7 @@ install:
     - sudo ./tests/install_ejabberd.sh testuser testpass
 
 before_script:
-    - cat behat.yml.dist | sed "s/precise32/$HOSTNAME/" > behat.yml
+    - cat tests/behat.yml.dist | sed "s/precise32/$HOSTNAME/" > tests/behat.yml
 
 script:
     - ./vendor/bin/phpunit -c tests --coverage-clover=build/logs/clover.xml
