@@ -20,6 +20,7 @@ before_script:
 
 script:
     - ./vendor/bin/phpunit -c tests --coverage-clover=build/logs/clover.xml
+    - ./vendor/bin/behat -c tests/behat.yml
 
 after_script:
     - wget https://scrutinizer-ci.com/ocular.phar

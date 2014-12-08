@@ -1,0 +1,11 @@
+default:
+    suites:
+        authentication_features:
+            paths: [ %paths.base%/features/ ]
+            contexts:
+                - Fabiang\Sasl\Behat\FeatureContext:
+                    - localhost
+                    - 15222
+                    - precise32
+                    - testuser
+                    - testpass
