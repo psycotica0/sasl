@@ -6,8 +6,8 @@ jabber_password=$2
 # Install ejabberd when control binary doesn't exists
 if [ -z `which ejabberdctl` ]; then
     echo -n "Install ejabberd... "
-    apt-get install -y ejabberd
-    dpkg --configure ejabberd
+    apt-get install -y ejabberd > /dev/null
+    dpkg --configure ejabberd > /dev/null
     echo "done"
 fi
 
