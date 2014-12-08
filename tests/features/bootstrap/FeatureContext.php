@@ -22,7 +22,11 @@ class FeatureContext implements Context, SnippetAcceptingContext
     protected $username;
     protected $password;
     protected $stream;
-    protected $authenticationObject;
+
+    /**
+     * @var Sasl
+     */
+    protected $authenticationFactory;
 
     /**
      * Initializes context.
@@ -44,6 +48,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $this->domain   = $domain;
         $this->username = $username;
         $this->password = $password;
+
+        $this->authenticationFactory = new Sasl;
     }
 
     /**
@@ -79,29 +85,71 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function xmppServerSupportsAuthenticationMethod($authenticationMethod)
     {
-        $data = $this->readStreamUntil('</features>');
-
-        Assert::assertContains("<mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>", $data);
-
-        if (false === strpos($data, "<mechanism>$authenticationMethod</mechanism>")) {
-            throw new PendingException(
-                "Skipped: Server does not support authentication method '$authenticationMethod'"
-            );
-        }
+        $data = $this->readStreamUntil('</stream:features>');
+        Assert::assertContains("<mechanism>$authenticationMethod</mechanism>", $data);
     }
 
     /**
-     * @When authenticate with method :authenticationMethod
+     * @When authenticate with method PLAIN
      */
-    public function authenticateWithMethod($authenticationMethod)
+    public function authenticateWithMethodPlain()
     {
-        $authenticationFactory = new Sasl;
-
-        $this->authenticationObject = $authenticationFactory->factory($authenticationMethod);
-        $authenticationData         = $this->authenticationObject->getResponse($this->username, $this->password);
+        $authenticationObject = $this->authenticationFactory->factory('PLAIN');
+        $authenticationData   = $authenticationObject->getResponse($this->username, $this->password);
         fwrite(
-            $this->stream, '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="'
-            . $authenticationMethod . '">' . base64_encode($authenticationData) . '</auth>'
+            $this->stream, '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">'
+            . base64_encode($authenticationData) . '</auth>'
+        );
+    }
+
+    /**
+     * @When authenticate with method DIGEST-MD5
+     */
+    public function authenticateWithMethodDigestMd5()
+    {
+        fwrite($this->stream, "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>");
+    }
+
+    /**
+     * @When response to challenge received
+     */
+    public function responseToChallengeReceived()
+    {
+        $data = $this->readStreamUntil('</challenge>');
+        Assert::assertRegExp("#<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</challenge>#", $data);
+
+        $authenticationObject = $this->authenticationFactory->factory('DIGEST-MD5');
+
+        $challenge = substr($data, 52, -12);
+
+        $response = $authenticationObject->getResponse(
+            $this->username,
+            $this->password,
+            base64_decode($challenge),
+            $this->domain,
+            'xmpp'
+        );
+
+        fwrite(
+            $this->stream,
+            "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($response) . "</response>"
+        );
+    }
+
+    /**
+     * @When response to rspauth challenge
+     */
+    public function responseToRspauthChallenge()
+    {
+        $data = $this->readStreamUntil('</challenge>');
+
+        $challenge = base64_decode(substr($data, 52, -12));
+
+        Assert::assertRegExp('/^rspauth=.+$/', $challenge);
+
+        fwrite(
+            $this->stream,
+            "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>"
         );
     }
 
@@ -119,13 +167,12 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $readStart = time();
         $data = '';
         do {
-            $data .= fread($this->stream, 4096);
-
             if (time() >= $readStart + $timeout) {
                 throw new \Exception('Timeout when trying to receive buffer');
             }
 
-        } while (strpos($data, $until));
+            $data .= fread($this->stream, 4096);
+        } while (false === strpos($data, $until));
 
         return $data;
     }
