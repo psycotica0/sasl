@@ -65,9 +65,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $errstr = null;
 
         $this->stream = stream_socket_client("tcp://{$this->hostname}:{$this->port}", $errno, $errstr, 5);
-        if (!$this->stream) {
-            throw new \Exception("Coudn't connection to host {$this->hostname}");
-        }
+
+        Assert::assertNotFalse($this->stream, "Coudn't connection to host {$this->hostname}");
 
         fwrite(
             $this->stream, '<?xml version="1.0" encoding="UTF-8"?><stream:stream to="' . $this->domain
@@ -81,6 +80,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function xmppServerSupportsAuthenticationMethod($authenticationMethod)
     {
         $data = $this->readStreamUntil('</features>');
+
+        Assert::assertContains("<mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>", $data);
+
         if (false === strpos($data, "<mechanism>$authenticationMethod</mechanism>")) {
             throw new PendingException(
                 "Skipped: Server does not support authentication method '$authenticationMethod'"

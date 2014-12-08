@@ -1,4 +1,4 @@
-Feature: Plain text authentication method
+Feature: Authentication at a xmpp server
 
   Background:
     Given Connection to xmpp server
