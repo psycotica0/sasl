@@ -8,9 +8,12 @@ php:
     - 5.6
     - hhvm
 
+before_install:
+    - echo $HOSTNAME
+
 install:
     - composer install --dev --no-interaction
-    - ./tests/install_ejabberd.sh testuser testpass
+    - sudo ./tests/install_ejabberd.sh testuser testpass
 
 script:
     - ./vendor/bin/phpunit -c tests --coverage-clover=build/logs/clover.xml
