@@ -5,7 +5,7 @@ jabber_password=$2
 
 # Install ejabberd when control binary doesn't exists
 if [ -z `which ejabberdctl` ]; then
-    echo -n "Install ejabberd… "
+    echo -n "Install ejabberd... "
     apt-get install -y ejabberd
     echo "done"
 fi
@@ -15,7 +15,7 @@ ejabberd_configured="/etc/ejabberd/configured"
 ejabberd_restart=0
 
 if [ ! -f "$ejabberd_configured" ]; then
-    echo -n "Configure ejabberd…"
+    echo -n "Configure ejabberd... "
 
     service ejabberd stop > /dev/null
 
@@ -60,7 +60,7 @@ fi
 # Adding users must be done after restarting the server, since hostname must be present
 user_exists=$(ejabberdctl registered-users $HOSTNAME | grep "$jabber_username" )
 if [ -z "$user_exists" ]; then
-    echo -n "Register user '$jabber_username' with password '$jabber_password' at ejabberd"
+    echo -n "Register user '$jabber_username' with password '$jabber_password' at ejabberd... "
 
     # restart and wait before adding users, otherwise adding fails
     service ejabberd restart > /dev/null
