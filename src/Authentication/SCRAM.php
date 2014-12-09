@@ -54,9 +54,9 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     private $hashAlgo;
     private $hash;
     private $hmac;
-    private $gs2_header;
+    private $gs2Header;
     private $cnonce;
-    private $first_message_bare;
+    private $firstMessageBare;
     private $saltedPassword;
     private $authMessage;
 
@@ -131,9 +131,7 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         // TODO: prepare through the SASLprep profile of the stringprep algorithm.
         // See RFC-4013.
 
-        $username = str_replace('=', '=3D', $username);
-        $username = str_replace(',', '=2C', $username);
-        return $username;
+        return str_replace(array('=', ','), array('=3D', '=2C'), $username);
     }
 
     /**
@@ -147,15 +145,15 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     private function generateInitialResponse($authcid, $authzid)
     {
         $gs2_cbind_flag   = 'n,'; // TODO: support channel binding.
-        $this->gs2_header = $gs2_cbind_flag . (!empty($authzid) ? 'a=' . $authzid : '') . ',';
+        $this->gs2Header = $gs2_cbind_flag . (!empty($authzid) ? 'a=' . $authzid : '') . ',';
 
         // I must generate a client nonce and "save" it for later comparison on second response.
-        $this->cnonce  = $this->generateCnonce();
+        $this->cnonce = $this->generateCnonce();
 
         // XXX: in the future, when mandatory and/or optional extensions are defined in any updated RFC,
         // this message can be updated.
-        $this->first_message_bare = 'n=' . $authcid . ',r=' . $this->cnonce;
-        return $this->gs2_header . $this->first_message_bare;
+        $this->firstMessageBare = 'n=' . $authcid . ',r=' . $this->cnonce;
+        return $this->gs2Header . $this->firstMessageBare;
     }
 
     /**
@@ -167,11 +165,11 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     private function generateResponse($challenge, $password)
     {
-        $matches = array();
+        $matches               = array();
         // XXX: as I don't support mandatory extension, I would fail on them.
         // And I simply ignore any optional extension.
-        $server_message_regexp = "#^r=([\x21-\x2B\x2D-\x7E]+),s=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9]{2}==)?),i=([0-9]*)(,[A-Za-z]=[^,])*$#";
-        if (!isset($this->cnonce, $this->gs2_header) || !preg_match($server_message_regexp, $challenge, $matches)) {
+        $serverMessageRegexp = "#^r=([\x21-\x2B\x2D-\x7E]+),s=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9]{2}==)?),i=([0-9]*)(,[A-Za-z]=[^,])*$#";
+        if (!isset($this->cnonce, $this->gs2Header) || !preg_match($serverMessageRegexp, $challenge, $matches)) {
             return false;
         }
         $nonce = $matches[1];
@@ -188,14 +186,14 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
             return false;
         }
 
-        $channel_binding = 'c=' . base64_encode($this->gs2_header); // TODO: support channel binding.
-        $final_message   = $channel_binding . ',r=' . $nonce; // XXX: no extension.
+        $channel_binding      = 'c=' . base64_encode($this->gs2Header); // TODO: support channel binding.
+        $final_message        = $channel_binding . ',r=' . $nonce; // XXX: no extension.
         // TODO: $password = $this->normalize($password); // SASLprep profile of stringprep.
         $saltedPassword       = $this->hi($password, $salt, $i);
         $this->saltedPassword = $saltedPassword;
         $clientKey            = call_user_func($this->hmac, $saltedPassword, "Client Key", true);
         $storedKey            = call_user_func($this->hash, $clientKey, true);
-        $authMessage          = $this->first_message_bare . ',' . $challenge . ',' . $final_message;
+        $authMessage          = $this->firstMessageBare . ',' . $challenge . ',' . $final_message;
         $this->authMessage    = $authMessage;
         $clientSignature      = call_user_func($this->hmac, $storedKey, $authMessage, true);
         $clientProof          = $clientKey ^ $clientSignature;
@@ -234,20 +232,20 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     public function processOutcome($data)
     {
-        $verifier_regexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Za-z0-9]{2}==)?)$#';
+        $verifierRegexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Za-z0-9]{2}==)?)$#';
 
         $matches = array();
-        if (!isset($this->saltedPassword, $this->authMessage) || !preg_match($verifier_regexp, $data, $matches)) {
+        if (!isset($this->saltedPassword, $this->authMessage) || !preg_match($verifierRegexp, $data, $matches)) {
             // This cannot be an outcome, you never sent the challenge's response.
             return false;
         }
 
-        $verifier                 = $matches[1];
-        $proposed_serverSignature = base64_decode($verifier);
-        $serverKey                = call_user_func($this->hmac, $this->saltedPassword, "Server Key", true);
-        $serverSignature          = call_user_func($this->hmac, $serverKey, $this->authMessage, true);
+        $verifier                = $matches[1];
+        $proposedServerSignature = base64_decode($verifier);
+        $serverKey               = call_user_func($this->hmac, $this->saltedPassword, "Server Key", true);
+        $serverSignature         = call_user_func($this->hmac, $serverKey, $this->authMessage, true);
 
-        return $proposed_serverSignature === $serverSignature;
+        return $proposedServerSignature === $serverSignature;
     }
 
     /**
