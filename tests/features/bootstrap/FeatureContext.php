@@ -24,6 +24,11 @@ class FeatureContext implements Context, SnippetAcceptingContext
     protected $stream;
 
     /**
+     * @var \Fabiang\Sasl\Authentication\AuthenticationInterface
+     */
+    protected $authenticationObject;
+
+    /**
      * @var Sasl
      */
     protected $authenticationFactory;
@@ -111,9 +116,23 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When response to challenge received
+     * @When authenticate with method SCRAM-SHA-1
      */
-    public function responseToChallengeReceived()
+    public function authenticateWithMethodScramSha1()
+    {
+        $this->authenticationObject = $this->authenticationFactory->factory('scram-sha-1');
+
+        $authData = base64_encode($this->authenticationObject->getResponse($this->username, $this->password));
+        fwrite(
+            $this->stream,
+            "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='SCRAM-SHA-1'>$authData</auth>"
+        );
+    }
+
+    /**
+     * @When responde to challenge received
+     */
+    public function respondeToChallengeReceived()
     {
         $data = $this->readStreamUntil('</challenge>');
         Assert::assertRegExp("#<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</challenge>#", $data);
@@ -137,9 +156,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When response to rspauth challenge
+     * @When responde to rspauth challenge
      */
-    public function responseToRspauthChallenge()
+    public function respondeToRspauthChallenge()
     {
         $data = $this->readStreamUntil('</challenge>');
 
@@ -147,9 +166,28 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
         Assert::assertRegExp('/^rspauth=.+$/', $challenge);
 
+        fwrite($this->stream, "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>");
+    }
+
+    /**
+     * @When responde to challenge for SCRAM-SHA-1
+     */
+    public function respondeToChallengeForScramSha1()
+    {
+        $data = $this->readStreamUntil('</challenge>');
+        Assert::assertRegExp("#<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</challenge>#", $data);
+
+        $challenge = base64_decode(substr($data, 52, -12));
+
+        $authData = $this->authenticationObject->getResponse(
+            $this->username,
+            $this->password,
+            $challenge
+        );
+
         fwrite(
             $this->stream,
-            "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>"
+            "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($authData) . "</response>"
         );
     }
 
@@ -162,6 +200,27 @@ class FeatureContext implements Context, SnippetAcceptingContext
         Assert::assertSame("<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>", $data);
     }
 
+    /**
+     * @Then should be authenticated with server with verification
+     */
+    public function shouldBeAuthenticatedWithServerWithVerification()
+    {
+        $data = fread($this->stream, 4096);
+        Assert::assertRegExp("#^<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</success>$#", $data);
+
+        $verfication = base64_decode(substr($data, 50, -10));
+
+        Assert::assertTrue($this->authenticationObject->processOutcome($verfication));
+    }
+
+    /**
+     * Read stream until string is found.
+     *
+     * @param string  $until
+     * @param integer $timeout
+     * @return string
+     * @throws \Exception
+     */
     private function readStreamUntil($until, $timeout = 5)
     {
         $readStart = time();
