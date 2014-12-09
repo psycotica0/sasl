@@ -168,7 +168,9 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         $matches               = array();
         // XXX: as I don't support mandatory extension, I would fail on them.
         // And I simply ignore any optional extension.
-        $serverMessageRegexp = "#^r=([\x21-\x2B\x2D-\x7E]+),s=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9]{2}==)?),i=([0-9]*)(,[A-Za-z]=[^,])*$#";
+        $serverMessageRegexp = "#^r=([\x21-\x2B\x2D-\x7E]+)"
+            . ",s=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9/]{2}==)?)"
+            . ",i=([0-9]*)(,[A-Za-z]=[^,])*$#";
         if (!isset($this->cnonce, $this->gs2Header) || !preg_match($serverMessageRegexp, $challenge, $matches)) {
             return false;
         }
