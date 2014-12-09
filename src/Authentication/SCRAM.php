@@ -234,7 +234,9 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     public function processOutcome($data)
     {
-        $verifier_regexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9]{2}==)?)$#';
+        $verifier_regexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Za-z0-9]{2}==)?)$#';
+
+        $matches = array();
         if (!isset($this->saltedPassword, $this->authMessage) || !preg_match($verifier_regexp, $data, $matches)) {
             // This cannot be an outcome, you never sent the challenge's response.
             return false;
@@ -244,7 +246,8 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         $proposed_serverSignature = base64_decode($verifier);
         $serverKey                = call_user_func($this->hmac, $this->saltedPassword, "Server Key", true);
         $serverSignature          = call_user_func($this->hmac, $serverKey, $this->authMessage, true);
-        return ($proposed_serverSignature === $serverSignature);
+
+        return $proposed_serverSignature === $serverSignature;
     }
 
     /**
