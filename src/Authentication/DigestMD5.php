@@ -124,7 +124,14 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
      */
     private function parseChallenge($challenge)
     {
-        $tokens  = array();
+        /**
+         * Defaults and required directives
+         */
+        $tokens  = array(
+            'realm'  => '',
+            'maxbuf' => 65536,
+        );
+
         $matches = array();
         while (preg_match('/^(?<key>[a-z-]+)=(?<value>"[^"]+(?<!\\\)"|[^,]+)/i', $challenge, $matches)) {
             $match = $matches[0];
@@ -132,41 +139,25 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
             $value = $matches['value'];
 
             // Ignore these as per rfc2831
-            if ($key == 'opaque' || $key == 'domain') {
-                $challenge = substr($challenge, strlen($match) + 1);
-                continue;
-            }
+            if ($key !== 'opaque' && $key !== 'domain') {
+                if (!empty($tokens[$key])) {
+                    // Allowed multiple "realm" and "auth-param"
+                    if ($key == 'realm' || $key == 'auth-param') {
+                        $tokens[$key] = (array) $tokens[$key];
+                        $tokens[$key][] = $this->trim($value);
 
-            // Allowed multiple "realm" and "auth-param"
-            if (!empty($tokens[$key]) && ($key == 'realm' || $key == 'auth-param')) {
-                if (is_array($tokens[$key])) {
-                    $tokens[$key][] = $this->trim($value);
+                    // Any other multiple instance = failure
+                    } else {
+                        return array();
+                    }
+
                 } else {
-                    $tokens[$key] = array($tokens[$key], $this->trim($value));
+                    $tokens[$key] = $this->trim($value);
                 }
-
-            // Any other multiple instance = failure
-            } elseif (!empty($tokens[$key])) {
-                return array();
-            } else {
-                $tokens[$key] = $this->trim($value);
             }
 
             // Remove the just parsed directive from the challenge
             $challenge = substr($challenge, strlen($match) + 1);
-        }
-
-        /**
-         * Defaults and required directives
-         */
-        // Realm
-        if (empty($tokens['realm'])) {
-            $tokens['realm'] = "";
-        }
-
-        // Maxbuf
-        if (empty($tokens['maxbuf'])) {
-            $tokens['maxbuf'] = 65536;
         }
 
         // Required: nonce, algorithm
