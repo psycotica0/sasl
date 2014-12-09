@@ -51,6 +51,7 @@ use Fabiang\Sasl\Exception\InvalidArgumentException;
 class SCRAM extends AbstractAuthentication implements AuthenticationInterface
 {
 
+    private $hashAlgo;
     private $hash;
     private $hmac;
     private $gs2_header;
@@ -73,35 +74,22 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     {
         // Though I could be strict, I will actually also accept the naming used in the PHP core hash framework.
         // For instance "sha1" is accepted, while the registered hash name should be "SHA-1".
-        $hash   = strtolower($hash);
-        $hashes = array(
-            'md2'     => 'md2',
-            'md5'     => 'md5',
-            'sha-1'   => 'sha1',
-            'sha1'    => 'sha1',
-            'sha-224' => 'sha224',
-            'sha224'  => 'sha224',
-            'sha-256' => 'sha256',
-            'sha256'  => 'sha256',
-            'sha-384' => 'sha384',
-            'sha384'  => 'sha384',
-            'sha-512' => 'sha512',
-            'sha512'  => 'sha512'
-        );
+        $normalizedHash = str_replace('-', '', strtolower($hash));
 
-        if (function_exists('hash_hmac') && isset($hashes[$hash])) {
-            $hashAlgo = $hashes[$hash];
-            $this->hash = create_function('$data', 'return hash("' . $hashAlgo . '", $data, true);');
-            $this->hmac = create_function('$key,$str,$raw', 'return hash_hmac("' . $hashAlgo . '", $str, $key, $raw);');
-        } elseif ($hash == 'md5') {
-            $this->hash = create_function('$data', 'return md5($data, true);');
-            $this->hmac = array($this, 'hmacMd5');
-        } elseif (in_array($hash, array('sha1', 'sha-1'))) {
-            $this->hash = create_function('$data', 'return sha1($data, true);');
-            $this->hmac = array($this, 'hmacSha1');
-        } else {
-            throw new InvalidArgumentException('Invalid SASL mechanism type');
+        $hashAlgos = hash_algos();
+        if (!in_array($normalizedHash, $hashAlgos)) {
+            throw new InvalidArgumentException("Invalid SASL mechanism type '$hash'");
         }
+
+        $this->hash = function ($data) use ($normalizedHash) {
+            return hash($normalizedHash, $data, true);
+        };
+
+        $this->hmac = function ($key, $str, $raw) use ($normalizedHash) {
+            return hash_hmac($normalizedHash, $str, $key, $raw);
+        };
+
+        $this->hashAlgo = $normalizedHash;
     }
 
     /**
@@ -120,6 +108,7 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         if (empty($authcid)) {
             return false;
         }
+
         if (!empty($authzid)) {
             $authzid = $this->formatName($authzid);
         }
@@ -274,5 +263,10 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     public function getAuthMessage()
     {
         return $this->authMessage;
+    }
+
+    public function getHashAlgo()
+    {
+        return $this->hashAlgo;
     }
 }

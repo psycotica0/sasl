@@ -60,11 +60,31 @@ class SCRAMTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers ::__construct
+     * @covers ::getHashAlgo
+     */
+    public function testConstructor()
+    {
+        $object = new SCRAM('sha-1');
+        $this->assertSame('sha1', $object->getHashAlgo());
+    }
+
+    /**
+     * @covers ::__construct
+     * @expectedException \Fabiang\Sasl\Exception\InvalidArgumentException
+     * @expectedExceptionMessage Invalid SASL mechanism type 'test'
+     */
+    public function testConstructorWithInvalidHash()
+    {
+        $object = new SCRAM('test');
+    }
+
+    /**
      * @covers ::getResponse
      * @covers ::generateCnonce
      * @covers ::formatName
      * @covers ::generateInitialResponse
-     * @uses Fabiang\Sasl\Authentication\SCRAM::__construct
+     * @covers ::__construct
      */
     public function testGetInitialResponse()
     {
@@ -89,7 +109,7 @@ class SCRAMTest extends \PHPUnit_Framework_TestCase
      * @covers ::generateResponse
      * @covers ::hi
      * @covers ::getCnonce
-     * @uses Fabiang\Sasl\Authentication\SCRAM::__construct
+     * @covers ::__construct
      * @uses Fabiang\Sasl\Authentication\SCRAM::formatName
      * @uses Fabiang\Sasl\Authentication\SCRAM::generateInitialResponse
      * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::generateCnonce
@@ -176,5 +196,14 @@ class SCRAMTest extends \PHPUnit_Framework_TestCase
         $serverSignature = hash_hmac('md5', $this->object->getAuthMessage(), $serverKey, true);
 
         $this->assertTrue($this->object->processOutcome('v=' . base64_encode($serverSignature)));
+    }
+
+    /**
+     * @covers ::processOutcome
+     * @uses Fabiang\Sasl\Authentication\SCRAM::__construct
+     */
+    public function testProcessOutcomeNoResponseBefore()
+    {
+        $this->assertFalse($this->object->processOutcome(''));
     }
 }
