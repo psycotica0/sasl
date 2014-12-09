@@ -11,7 +11,7 @@ Feature: Authentication with a xmpp server
   Scenario: Authenticate with xmpp server through digest-md5 authentication
     Given xmpp server supports authentication method "DIGEST-MD5"
     When authenticate with method DIGEST-MD5
-    And responde to challenge received
+    And responde to challenge received for DIGEST-MD5
     And responde to rspauth challenge
     Then should be authenticated with server
 

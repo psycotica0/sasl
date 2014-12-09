@@ -164,9 +164,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When responde to challenge received
+     * @When responde to challenge received for DIGEST-MD5
      */
-    public function respondeToChallengeReceived()
+    public function respondeToChallengeReceivedForDigestMd5()
     {
         $data = $this->readStreamUntil('</challenge>');
         Assert::assertRegExp("#<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</challenge>#", $data);
