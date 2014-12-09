@@ -51,7 +51,7 @@ After so minutes you'll have a runnig ejabberd instance inside of a virtual mach
 Now you can run the integration tests:
 
 ```
-./vendor/bin/behat --config=tests/behat.yml.dist
+./vendor/bin/behat -c tests/behat.yml.dist
 ```
 
 ## License
