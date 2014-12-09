@@ -1,7 +1,9 @@
 Modified BSD License
 ====================
 
-Copyright (c) 2014, Jaussoin Timothée
+Copyright (c) 2002-2003 Richard Heyes,
+              2014 Jaussoin Timothée,
+              2014 Fabian Grutschus
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
