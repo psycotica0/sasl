@@ -48,6 +48,20 @@ class Sasl
 {
 
     /**
+     * Known authentication mechanisms classes.
+     *
+     * @var array
+     */
+    protected $mechanisms = array(
+        'anonymous' => 'Fabiang\\Sasl\Authentication\\Anonymous',
+        'login'     => 'Fabiang\\Sasl\Authentication\\Login',
+        'plain'     => 'Fabiang\\Sasl\Authentication\\Plain',
+        'external'  => 'Fabiang\\Sasl\Authentication\\External',
+        'crammd5'   => 'Fabiang\\Sasl\Authentication\\CramMD5',
+        'digestmd5' => 'Fabiang\\Sasl\Authentication\\DigestMD5',
+    );
+
+    /**
      * Factory class. Returns an object of the request
      * type.
      *
@@ -60,58 +74,24 @@ class Sasl
      */
     public function factory($type)
     {
-        $classname = 'Fabiang\\Sasl\Authentication\\';
-        switch (strtolower($type)) {
-            case 'anonymous':
-                $classname .= 'Anonymous';
-                break;
+        $className = null;
+        $parameter = null;
+        $matches   = array();
 
-            case 'login':
-                $classname .= 'Login';
-                break;
+        $formatedType = strtolower(str_replace('-', '', $type));
 
-            case 'plain':
-                $classname .= 'Plain';
-                break;
-
-            case 'external':
-                $classname .= 'External';
-                break;
-
-            case 'crammd5':
-            // $msg = 'Deprecated mechanism name. Use IANA-registered name: CRAM-MD5.';
-            // trigger_error($msg, E_USER_DEPRECATED);
-            case 'cram-md5':
-                $classname .= 'CramMD5';
-                break;
-
-            case 'digestmd5':
-            // $msg = 'Deprecated mechanism name. Use IANA-registered name: DIGEST-MD5.';
-            // trigger_error($msg, E_USER_DEPRECATED);
-            case 'digest-md5':
-                // $msg = 'DIGEST-MD5 is a deprecated SASL mechanism as per RFC-6331. Using it could be a security risk.';
-                // trigger_error($msg, E_USER_NOTICE);
-                $classname .= 'DigestMD5';
-                break;
-
-            default:
-                $scram = '/^SCRAM-(.{1,9})$/i';
-                if (preg_match($scram, $type, $matches)) {
-                    $hash      = $matches[1];
-                    $classname .= 'SCRAM';
-                    $parameter = $hash;
-                    break;
-                }
-                throw new InvalidArgumentException('Invalid SASL mechanism type');
-                break;
+        if (isset($this->mechanisms[$formatedType])) {
+            $className = $this->mechanisms[$formatedType];
+        } elseif (preg_match('/^scram(?<algo>.{1,9})$/i', $formatedType, $matches)) {
+            $className = 'Fabiang\\Sasl\Authentication\\SCRAM';
+            $parameter = $matches['algo'];
         }
 
-        if (isset($parameter)) {
-            $obj = new $classname($parameter);
-        } else {
-            $obj = new $classname();
+        if (null === $className) {
+            throw new InvalidArgumentException("Invalid SASL mechanism type '$type'");
         }
 
-        return $obj;
+        $object = new $className($parameter);
+        return $object;
     }
 }
