@@ -86,11 +86,11 @@ abstract class AbstractAuthentication
             }
         }
 
-        $str = '';
+        $cnonce = '';
         for ($i = 0; $i < 32; $i++) {
-            $str .= chr(mt_rand(0, 255));
+            $cnonce .= chr(mt_rand(0, 255));
         }
 
-        return base64_encode($str);
+        return base64_encode($cnonce);
     }
 }
