@@ -53,7 +53,7 @@ class Plain implements AuthenticationInterface
      * @param  string $authzid   Autorization id
      * @return string            PLAIN Response
      */
-    function getResponse($authcid, $pass, $authzid = '')
+    public function getResponse($authcid, $pass, $authzid = '')
     {
         return $authzid . chr(0) . $authcid . chr(0) . $pass;
     }

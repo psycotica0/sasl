@@ -55,7 +55,7 @@ class Login implements AuthenticationInterface
      * @param  string $pass Password
      * @return string       LOGIN string
      */
-    function getResponse($user, $pass)
+    public function getResponse($user, $pass)
     {
         return sprintf('LOGIN %s %s', $user, $pass);
     }

@@ -61,7 +61,7 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
      * @return string            The digest response (NOT base64 encoded)
      * @access public
      */
-    function getResponse($authcid, $pass, $challenge, $hostname, $service, $authzid = '')
+    public function getResponse($authcid, $pass, $challenge, $hostname, $service, $authzid = '')
     {
         $parsedChallenge = $this->parseChallenge($challenge);
         $authzidString = '';

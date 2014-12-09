@@ -53,7 +53,7 @@ class External implements AuthenticationInterface
      * @param  string $authzid   Autorization id
      * @return string            EXTERNAL Response
      */
-    function getResponse($authcid, $pass, $authzid = '')
+    public function getResponse($authcid, $pass, $authzid = '')
     {
         return $authzid;
     }

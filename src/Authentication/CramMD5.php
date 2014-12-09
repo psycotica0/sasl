@@ -60,7 +60,7 @@ class CramMD5 extends AbstractAuthentication implements AuthenticationInterface
      * @return string The string to pass back to the server, of the form
      *                "<user> <digest>". This is NOT base64_encoded.
      */
-    function getResponse($user, $pass, $challenge)
+    public function getResponse($user, $pass, $challenge)
     {
         return $user . ' ' . $this->hmacMd5($pass, $challenge);
     }
