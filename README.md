@@ -33,7 +33,7 @@ version of PHPUnit and Behat.
 composer install --dev
 ```
 
-After that run the Unit tests:
+After that run the unit tests:
 
 ```
 ./vendor/bin/phpunit -c tests
@@ -41,13 +41,13 @@ After that run the Unit tests:
 
 The integration tests test the authentication methods against an ejabberd server.
 To launch an ejabberd server you can use the provided Vagrant box.
-Just [install Vagrant](https://www.vagrantup.com/downloads.html) and launch:
+Just [install Vagrant](https://www.vagrantup.com/downloads.html) and run:
 
 ```
 vagrant up
 ```
 
-After so minutes you'll have a runnig ejabberd instance inside of a virtual machine.
+After so minutes you'll have a runnig ejabberd instance inside of a virtual machine.  
 Now you can run the integration tests:
 
 ```
