@@ -1,7 +1,7 @@
 {
     "name": "fabiang/sasl",
     "description": "Abstraction of various SASL mechanism responses.",
-    "license": "BSD-2-Clause",
+    "license": "BSD-3-Clause",
     "homepage": "https://github.com/fabiang/sasl",
     "keywords": ["sasl", "authentication", "scram", "auth"],
     "type": "library",
