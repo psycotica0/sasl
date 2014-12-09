@@ -128,9 +128,6 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     private function formatName($username)
     {
-        // TODO: prepare through the SASLprep profile of the stringprep algorithm.
-        // See RFC-4013.
-
         return str_replace(array('=', ','), array('=3D', '=2C'), $username);
     }
 
@@ -144,14 +141,12 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     private function generateInitialResponse($authcid, $authzid)
     {
-        $gs2_cbind_flag   = 'n,'; // TODO: support channel binding.
+        $gs2_cbind_flag   = 'n,';
         $this->gs2Header = $gs2_cbind_flag . (!empty($authzid) ? 'a=' . $authzid : '') . ',';
 
         // I must generate a client nonce and "save" it for later comparison on second response.
         $this->cnonce = $this->generateCnonce();
 
-        // XXX: in the future, when mandatory and/or optional extensions are defined in any updated RFC,
-        // this message can be updated.
         $this->firstMessageBare = 'n=' . $authcid . ',r=' . $this->cnonce;
         return $this->gs2Header . $this->firstMessageBare;
     }
@@ -165,9 +160,8 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     private function generateResponse($challenge, $password)
     {
-        $matches               = array();
-        // XXX: as I don't support mandatory extension, I would fail on them.
-        // And I simply ignore any optional extension.
+        $matches = array();
+
         $serverMessageRegexp = "#^r=([\x21-\x2B\x2D-\x7E]+)"
             . ",s=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Xa-z0-9/]{2}==)?)"
             . ",i=([0-9]*)(,[A-Za-z]=[^,])*$#";
@@ -188,9 +182,8 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
             return false;
         }
 
-        $channel_binding      = 'c=' . base64_encode($this->gs2Header); // TODO: support channel binding.
-        $final_message        = $channel_binding . ',r=' . $nonce; // XXX: no extension.
-        // TODO: $password = $this->normalize($password); // SASLprep profile of stringprep.
+        $channel_binding      = 'c=' . base64_encode($this->gs2Header);
+        $final_message        = $channel_binding . ',r=' . $nonce;
         $saltedPassword       = $this->hi($password, $salt, $i);
         $this->saltedPassword = $saltedPassword;
         $clientKey            = call_user_func($this->hmac, $saltedPassword, "Client Key", true);
