@@ -234,7 +234,7 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     public function processOutcome($data)
     {
-        $verifierRegexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9]{3}=|[A-Za-z0-9]{2}==)?)$#';
+        $verifierRegexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9/]{3}=|[A-Za-z0-9]{2}==)?)$#';
 
         $matches = array();
         if (!isset($this->saltedPassword, $this->authMessage) || !preg_match($verifierRegexp, $data, $matches)) {
