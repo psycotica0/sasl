@@ -9,5 +9,6 @@ default:
                     - precise32
                     - testuser
                     - testpass
+                    - %paths.base%/log/features/
     testers:
         strict: true

@@ -56,6 +56,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     protected $username;
     protected $password;
     protected $stream;
+    protected $logfile;
 
     /**
      * @var \Fabiang\Sasl\Authentication\AuthenticationInterface
@@ -79,8 +80,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
      * @param string  $domain
      * @param string  $username Domain name of server (important for connecting)
      * @param string  $password
+     * @param string  $logdir
      */
-    public function __construct($hostname, $port, $domain, $username, $password)
+    public function __construct($hostname, $port, $domain, $username, $password, $logdir)
     {
         $this->hostname = $hostname;
         $this->port     = (int) $port;
@@ -88,7 +90,12 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $this->username = $username;
         $this->password = $password;
 
+        if (!is_dir($logdir)) {
+            mkdir($logdir, 0777, true);
+        }
+
         $this->authenticationFactory = new Sasl;
+        $this->logfile = fopen($logdir . '/behat.' . time() . '.log', 'w');
     }
 
     /**
@@ -99,6 +106,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
         if ($this->stream) {
             fclose($this->stream);
         }
+
+        fclose($this->logfile);
     }
 
     /**
@@ -113,8 +122,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
         Assert::assertNotFalse($this->stream, "Coudn't connection to host {$this->hostname}");
 
-        fwrite(
-            $this->stream, '<?xml version="1.0" encoding="UTF-8"?><stream:stream to="' . $this->domain
+        $this->write(
+            '<?xml version="1.0" encoding="UTF-8"?><stream:stream to="' . $this->domain
             . '" xmlns:stream="http://etherx.jabber.org/streams" xmlns="jabber:client" version="1.0">'
         );
     }
@@ -135,8 +144,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $authenticationObject = $this->authenticationFactory->factory('PLAIN');
         $authenticationData   = $authenticationObject->getResponse($this->username, $this->password);
-        fwrite(
-            $this->stream, '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">'
+        $this->write(
+            '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">'
             . base64_encode($authenticationData) . '</auth>'
         );
     }
@@ -146,7 +155,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function authenticateWithMethodDigestMd5()
     {
-        fwrite($this->stream, "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>");
+        $this->write("<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>");
     }
 
     /**
@@ -157,8 +166,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $this->authenticationObject = $this->authenticationFactory->factory('scram-sha-1');
 
         $authData = base64_encode($this->authenticationObject->getResponse($this->username, $this->password));
-        fwrite(
-            $this->stream,
+        $this->write(
             "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='SCRAM-SHA-1'>$authData</auth>"
         );
     }
@@ -183,8 +191,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
             'xmpp'
         );
 
-        fwrite(
-            $this->stream,
+        $this->write(
             "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($response) . "</response>"
         );
     }
@@ -200,7 +207,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
         Assert::assertRegExp('/^rspauth=.+$/', $challenge);
 
-        fwrite($this->stream, "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>");
+        $this->write("<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>");
     }
 
     /**
@@ -219,8 +226,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
             $challenge
         );
 
-        fwrite(
-            $this->stream,
+        $this->write(
             "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($authData) . "</response>"
         );
     }
@@ -230,7 +236,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function shouldBeAuthenticatedWithServer()
     {
-        $data = fread($this->stream, 4096);
+        $data = $this->read();
         Assert::assertSame("<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>", $data);
     }
 
@@ -239,7 +245,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function shouldBeAuthenticatedWithServerWithVerification()
     {
-        $data = fread($this->stream, 4096);
+        $data = $this->read();
         Assert::assertRegExp("#^<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</success>$#", $data);
 
         $verfication = base64_decode(substr($data, 50, -10));
@@ -264,9 +270,22 @@ class FeatureContext implements Context, SnippetAcceptingContext
                 throw new \Exception('Timeout when trying to receive buffer');
             }
 
-            $data .= fread($this->stream, 4096);
+            $data .= $this->read();
         } while (false === strpos($data, $until));
 
         return $data;
+    }
+
+    private function read()
+    {
+        $data = fread($this->stream, 4096);
+        fwrite($this->logfile, 'S: ' . $data . "\n");
+        return $data;
+    }
+
+    private function write($data)
+    {
+        fwrite($this->stream, $data);
+        fwrite($this->logfile, 'C: ' . $data . "\n");
     }
 }
