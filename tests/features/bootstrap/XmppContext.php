@@ -47,7 +47,7 @@ use Fabiang\Sasl\Sasl;
  *
  * @author Fabian Grutschus <f.grutschus@lubyte.de>
  */
-class FeatureContext implements Context, SnippetAcceptingContext
+class XmppContext extends AbstractContext implements Context, SnippetAcceptingContext
 {
 
     protected $hostname;
@@ -55,8 +55,6 @@ class FeatureContext implements Context, SnippetAcceptingContext
     protected $domain;
     protected $username;
     protected $password;
-    protected $stream;
-    protected $logfile;
 
     /**
      * @var \Fabiang\Sasl\Authentication\AuthenticationInterface
@@ -95,7 +93,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         }
 
         $this->authenticationFactory = new Sasl;
-        $this->logfile = fopen($logdir . '/behat.' . time() . '.log', 'w');
+        $this->logfile = fopen($logdir . '/behat.xmpp.' . time() . '.log', 'w');
     }
 
     /**
@@ -115,12 +113,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function connectionToXmppServer()
     {
-        $errno  = null;
-        $errstr = null;
-
-        $this->stream = stream_socket_client("tcp://{$this->hostname}:{$this->port}", $errno, $errstr, 5);
-
-        Assert::assertNotFalse($this->stream, "Coudn't connection to host {$this->hostname}");
+        $this->connect();
 
         $this->write(
             '<?xml version="1.0" encoding="UTF-8"?><stream:stream to="' . $this->domain
@@ -232,18 +225,18 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then should be authenticated with server
+     * @Then should be authenticated at xmpp server
      */
-    public function shouldBeAuthenticatedWithServer()
+    public function shouldBeAuthenticatedAtXmppServer()
     {
         $data = $this->read();
         Assert::assertSame("<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>", $data);
     }
 
     /**
-     * @Then should be authenticated with server with verification
+     * @Then should be authenticated at xmpp server with verification
      */
-    public function shouldBeAuthenticatedWithServerWithVerification()
+    public function shouldBeAuthenticatedAtXmppServerWithVerification()
     {
         $data = $this->read();
         Assert::assertRegExp("#^<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</success>$#", $data);
@@ -251,41 +244,5 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $verfication = base64_decode(substr($data, 50, -10));
 
         Assert::assertTrue($this->authenticationObject->processOutcome($verfication));
-    }
-
-    /**
-     * Read stream until string is found.
-     *
-     * @param string  $until
-     * @param integer $timeout
-     * @return string
-     * @throws \Exception
-     */
-    private function readStreamUntil($until, $timeout = 5)
-    {
-        $readStart = time();
-        $data = '';
-        do {
-            if (time() >= $readStart + $timeout) {
-                throw new \Exception('Timeout when trying to receive buffer');
-            }
-
-            $data .= $this->read();
-        } while (false === strpos($data, $until));
-
-        return $data;
-    }
-
-    private function read()
-    {
-        $data = fread($this->stream, 4096);
-        fwrite($this->logfile, 'S: ' . $data . "\n");
-        return $data;
-    }
-
-    private function write($data)
-    {
-        fwrite($this->stream, $data);
-        fwrite($this->logfile, 'C: ' . $data . "\n");
     }
 }

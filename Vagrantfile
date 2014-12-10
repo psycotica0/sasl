@@ -24,6 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
   config.vm.network "forwarded_port", guest: 15222, host: 15222
+  config.vm.network "forwarded_port", guest: 11110, host: 11110
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -59,9 +60,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # View the documentation for the provider you're using for more
   # information on available options.
 
+  #config.vm.provision "shell", inline: "apt-get update > /dev/null"
+
   # Install ejabberd for integration tests by bash script
   config.vm.provision "shell" do |s|
-    s.path = "tests/install_ejabberd.sh"
+    s.path = "tests/provisioner/install_ejabberd.sh"
+    s.args = ["testuser", "testpass"]
+  end
+
+  # Install dovecot for integration tests by bash script
+  config.vm.provision "shell" do |s|
+    s.path = "tests/provisioner/install_dovecot.sh"
     s.args = ["testuser", "testpass"]
   end
 

@@ -3,10 +3,16 @@ default:
         authentication_features:
             paths: [ %paths.base%/features/ ]
             contexts:
-                - Fabiang\Sasl\Behat\FeatureContext:
+                - Fabiang\Sasl\Behat\XmppContext:
                     - localhost
                     - 15222
                     - precise32
+                    - testuser
+                    - testpass
+                    - %paths.base%/log/features/
+                - Fabiang\Sasl\Behat\Pop3Context:
+                    - localhost
+                    - 11110
                     - testuser
                     - testpass
                     - %paths.base%/log/features/

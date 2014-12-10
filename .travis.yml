@@ -13,7 +13,8 @@ before_install:
 
 install:
     - composer install --dev --no-interaction
-    - sudo ./tests/install_ejabberd.sh testuser testpass
+    - sudo ./tests/provisioner/install_ejabberd.sh testuser testpass
+    - sudo ./tests/provisioner/install_dovecot.sh testuser testpass
 
 before_script:
     - cat tests/behat.yml.dist | sed "s/precise32/$HOSTNAME/" > tests/behat.yml
