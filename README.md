@@ -40,15 +40,15 @@ After that run the unit tests:
 ./vendor/bin/phpunit -c tests
 ```
 
-The integration tests test the authentication methods against an ejabberd server.
-To launch an ejabberd server you can use the provided Vagrant box.
+The integration tests verify the authentication methods against an Ejabberd and Dovecot server.
+To launch the servers you can use the provided Vagrant box.
 Just [install Vagrant](https://www.vagrantup.com/downloads.html) and run:
 
 ```
 vagrant up
 ```
 
-After so minutes you'll have a runnig ejabberd instance inside of a virtual machine.  
+After so minutes you'll have the runnig server instances inside of a virtual machine.  
 Now you can run the integration tests:
 
 ```
