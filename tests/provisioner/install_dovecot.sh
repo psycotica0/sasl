@@ -111,7 +111,7 @@ if [ ! -f "$dovecot_configured" ]; then
     echo "done"
 fi
 
-id "$dovecot_username" 2>&1 /dev/null
+id "$dovecot_username" > /dev/null 2>&1
 if [ $? -eq 1 ]; then
     echo -n "Adding user '$dovecot_username' with password '$dovecot_password'"
     useradd --password "$dovecot_password" "$dovecot_username" > /dev/null

@@ -43,7 +43,7 @@ if [ -z `which ejabberdctl` ]; then
     echo -n "Install ejabberd... "
     apt-get update > /dev/null
     apt-get install -y ejabberd > /dev/null
-    dpkg --configure ejabberd 2&>1 /dev/null
+    dpkg --configure ejabberd > /dev/null 2>&1
     echo "done"
 fi
 
