@@ -64,6 +64,7 @@ class DigestMD5Test extends TestCase
     /**
      * @covers ::getResponse
      * @covers ::parseChallenge
+     * @covers ::checkToken
      * @covers ::getResponseValue
      * @covers ::generateCnonce
      * @covers ::trim
@@ -86,6 +87,7 @@ class DigestMD5Test extends TestCase
 
     /**
      * @covers ::getResponse
+     * @covers ::checkToken
      * @covers ::parseChallenge
      * @covers ::getResponseValue
      * @covers ::generateCnonce
@@ -110,6 +112,7 @@ class DigestMD5Test extends TestCase
     /**
      * @covers ::getResponse
      * @covers ::parseChallenge
+     * @covers ::checkToken
      * @covers ::getResponseValue
      * @covers ::generateCnonce
      * @covers ::trim
@@ -143,6 +146,7 @@ class DigestMD5Test extends TestCase
      * @expectedException \Fabiang\Sasl\Exception\InvalidArgumentException
      * @covers ::getResponse
      * @covers ::parseChallenge
+     * @covers ::checkToken
      * @covers ::trim
      */
     public function testParseChallengeNotAllowiedMultiples()

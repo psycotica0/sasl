@@ -138,23 +138,7 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
             $key   = $matches['key'];
             $value = $matches['value'];
 
-            // Ignore these as per rfc2831
-            if ($key !== 'opaque' && $key !== 'domain') {
-                if (!empty($tokens[$key])) {
-                    // Allowed multiple "realm" and "auth-param"
-                    if ($key == 'realm' || $key == 'auth-param') {
-                        $tokens[$key] = (array) $tokens[$key];
-                        $tokens[$key][] = $this->trim($value);
-
-                    // Any other multiple instance = failure
-                    } else {
-                        return array();
-                    }
-
-                } else {
-                    $tokens[$key] = $this->trim($value);
-                }
-            }
+            $this->checkToken($tokens, $key, $value);
 
             // Remove the just parsed directive from the challenge
             $challenge = substr($challenge, strlen($match) + 1);
@@ -166,6 +150,33 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
         }
 
         return $tokens;
+    }
+
+    /**
+     * Check found token.
+     *
+     * @param array  $tokens
+     * @param string $key
+     * @param string $value
+     */
+    private function checkToken(array &$tokens, $key, $value)
+    {
+        // Ignore these as per rfc2831
+        if ($key !== 'opaque' && $key !== 'domain') {
+            if (!empty($tokens[$key])) {
+                // Allowed multiple "realm" and "auth-param"
+                if ($key == 'realm' || $key == 'auth-param') {
+                    $tokens[$key] = (array) $tokens[$key];
+                    $tokens[$key][] = $this->trim($value);
+
+                    // Any other multiple instance = failure
+                } else {
+                    return array();
+                }
+            } else {
+                $tokens[$key] = $this->trim($value);
+            }
+        }
     }
 
     /**
