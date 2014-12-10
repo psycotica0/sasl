@@ -62,6 +62,6 @@ class CramMD5 extends AbstractAuthentication implements AuthenticationInterface
      */
     public function getResponse($user, $pass, $challenge)
     {
-        return $user . ' ' . $this->hmacMd5($pass, $challenge);
+        return $user . ' ' . hash_hmac('md5', $challenge, $pass);
     }
 }

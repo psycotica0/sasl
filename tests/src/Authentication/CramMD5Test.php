@@ -63,7 +63,6 @@ class CramMD5Test extends TestCase
 
     /**
      * @covers ::getResponse
-     * @covers ::hmacMd5
      */
     public function testGetResponse()
     {
