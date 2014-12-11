@@ -116,6 +116,7 @@ class DigestMD5Test extends TestCase
     /**
      * @covers ::getResponse
      * @covers ::parseChallenge
+     * @covers ::checkToken
      * @covers ::getResponseValue
      * @covers ::generateCnonce
      * @covers ::trim
