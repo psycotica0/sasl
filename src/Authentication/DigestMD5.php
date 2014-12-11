@@ -66,7 +66,7 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
         $parsedChallenge = $this->parseChallenge($challenge);
         $authzidString = '';
         if ($authzid != '') {
-            $authzidString = ',authzid="' . $authzid . '"';
+            $authzidString = 'authzid="' . $authzid . '",';
         }
 
         if (!empty($parsedChallenge)) {
@@ -82,33 +82,23 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
                 $authzid
             );
 
+            $realm  = '';
             if ($parsedChallenge['realm']) {
-                $realm = $parsedChallenge['realm'];
-
-                return sprintf(
-                    'username="%s",realm="%s"%s,nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",'
-                    . 'response=%s,maxbuf=%d',
-                    $authcid,
-                    $realm,
-                    $authzidString,
-                    $parsedChallenge['nonce'],
-                    $cnonce,
-                    $digestUri,
-                    $responseValue,
-                    $parsedChallenge['maxbuf']
-                );
-            } else {
-                return sprintf(
-                    'username="%s"%s,nonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",response=%s,maxbuf=%d',
-                    $authcid,
-                    $authzidString,
-                    $parsedChallenge['nonce'],
-                    $cnonce,
-                    $digestUri,
-                    $responseValue,
-                    $parsedChallenge['maxbuf']
-                );
+                $realm = 'realm="' . $parsedChallenge['realm'] . '",';
             }
+
+            return sprintf(
+                'username="%s",%s%snonce="%s",cnonce="%s",nc=00000001,qop=auth,digest-uri="%s",'
+                . 'response=%s,maxbuf=%d',
+                $authcid,
+                $realm,
+                $authzidString,
+                $parsedChallenge['nonce'],
+                $cnonce,
+                $digestUri,
+                $responseValue,
+                $parsedChallenge['maxbuf']
+            );
         }
 
         throw new InvalidArgumentException('Invalid digest challenge');
