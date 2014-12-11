@@ -46,6 +46,13 @@ abstract class AbstractAuthentication
 {
 
     /**
+     * Use random devices.
+     *
+     * @var bool
+     */
+    public static $useDevRandom = true;
+
+    /**
      * Creates the client nonce for the response
      *
      * @return string The cnonce value
@@ -53,7 +60,7 @@ abstract class AbstractAuthentication
     protected function generateCnonce()
     {
         foreach (array('/dev/urandom', '/dev/random') as $file) {
-            if (is_readable($file)) {
+            if (true === static::$useDevRandom && is_readable($file)) {
                 return base64_encode(file_get_contents($file, false, null, -1, 32));
             }
         }

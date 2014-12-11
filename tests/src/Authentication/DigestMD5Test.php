@@ -93,6 +93,33 @@ class DigestMD5Test extends TestCase
      * @covers ::generateCnonce
      * @covers ::trim
      */
+    public function testGetResponseRealmWithoutDevRandom()
+    {
+        DigestMD5::$useDevRandom = false;
+
+         $this->assertRegExp(
+            '#^username="authcid",realm="localhost",authzid="authzid",nonce="abcdefghijklmnopqrstuvw",cnonce="[^"]+",nc=00000001,'
+            . 'qop=auth,digest-uri="service/hostname",response=[^,]+,maxbuf=65536$#',
+            $this->object->getResponse(
+                'authcid',
+                'pass',
+                'realm="localhost",nonce="abcdefghijklmnopqrstuvw",qop="auth",charset=utf-8,algorithm=md5-sess',
+                'hostname',
+                'service',
+                'authzid'
+            )
+        );
+
+        DigestMD5::$useDevRandom = true;
+    }
+
+    /**
+     * @covers ::getResponse
+     * @covers ::parseChallenge
+     * @covers ::getResponseValue
+     * @covers ::generateCnonce
+     * @covers ::trim
+     */
     public function testGetResponseNoRealm()
     {
          $this->assertRegExp(
