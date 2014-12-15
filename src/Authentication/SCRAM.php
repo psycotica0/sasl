@@ -141,8 +141,8 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      */
     private function generateInitialResponse($authcid, $authzid)
     {
-        $gs2_cbind_flag   = 'n,';
-        $this->gs2Header = $gs2_cbind_flag . (!empty($authzid) ? 'a=' . $authzid : '') . ',';
+        $gs2CbindFlag   = 'n,';
+        $this->gs2Header = $gs2CbindFlag . (!empty($authzid) ? 'a=' . $authzid : '') . ',';
 
         // I must generate a client nonce and "save" it for later comparison on second response.
         $this->cnonce = $this->generateCnonce();
@@ -183,18 +183,18 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         }
 
         $channel_binding      = 'c=' . base64_encode($this->gs2Header);
-        $final_message        = $channel_binding . ',r=' . $nonce;
+        $finalMessage         = $channel_binding . ',r=' . $nonce;
         $saltedPassword       = $this->hi($password, $salt, $i);
         $this->saltedPassword = $saltedPassword;
         $clientKey            = call_user_func($this->hmac, $saltedPassword, "Client Key", true);
         $storedKey            = call_user_func($this->hash, $clientKey, true);
-        $authMessage          = $this->firstMessageBare . ',' . $challenge . ',' . $final_message;
+        $authMessage          = $this->firstMessageBare . ',' . $challenge . ',' . $finalMessage;
         $this->authMessage    = $authMessage;
         $clientSignature      = call_user_func($this->hmac, $storedKey, $authMessage, true);
         $clientProof          = $clientKey ^ $clientSignature;
         $proof                = ',p=' . base64_encode($clientProof);
 
-        return $final_message . $proof;
+        return $finalMessage . $proof;
     }
 
     /**
