@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -n $IS_HHVM && $IS_HHVM -eq 0 ]]; then
+if [[ -n $IS_HHVM && $IS_HHVM -eq 1 ]]; then
     wget https://scrutinizer-ci.com/ocular.phar
     php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
     php vendor/bin/coveralls
