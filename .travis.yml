@@ -30,11 +30,7 @@ script:
     - ./vendor/bin/behat -c tests/behat.yml -f progress
 
 after_script:
-    - if [[ -n $IS_HHVM && $IS_HHVM -eq 0 ]]; wget https://scrutinizer-ci.com/ocular.phar; fi
-    - if [[ -n $IS_HHVM && $IS_HHVM -eq 0 ]]; php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml; fi
-    - if [[ -n $IS_HHVM && $IS_HHVM -eq 0 ]]; php vendor/bin/coveralls; fi
-    - if [[ -n $IS_HHVM && $IS_HHVM -eq 0 ]]; php vendor/bin/test-reporter --stdout > codeclimate.json; fi
-    - if [[ -n $IS_HHVM && $IS_HHVM -eq 0 ]]; ./tests/upload_codeclimate.sh; fi
+    - ./tests/upload_artefacts.sh
 
 after_failure:
     - cat tests/log/features/behat.*.log
