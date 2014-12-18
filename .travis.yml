@@ -15,6 +15,7 @@ addons:
 before_install:
     - echo $HOSTNAME
     - export IS_HHVM=$(phpenv version | grep "hhvm" > /dev/null; echo $?)
+    - echo $IS_HHVM
 
 install:
     - composer install --dev --no-interaction
