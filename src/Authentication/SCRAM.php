@@ -49,7 +49,7 @@ use Fabiang\Sasl\Exception\InvalidArgumentException;
  *
  * @author Jehan <jehan.marmottard@gmail.com>
  */
-class SCRAM extends AbstractAuthentication implements AuthenticationInterface, VerificationInterface
+class SCRAM extends AbstractAuthentication implements ChallengeAuthenticationInterface, VerificationInterface
 {
 
     private $hashAlgo;

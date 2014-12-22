@@ -32,34 +32,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @author Richard Heyes <richard@php.net>
+ * @author Fabian Grutschus <f.grutschus@lubyte.de>
  */
 
 namespace Fabiang\Sasl\Authentication;
 
-use Fabiang\Sasl\Authentication\AbstractAuthentication;
-
 /**
- * Implmentation of CRAM-MD5 SASL mechanism
+ * Authentication mechaisms based on challenge responses.
  *
- * @author Richard Heyes <richard@php.net>
+ * @author Fabian Grutschus <f.grutschus@lubyte.de>
  */
-class CramMD5 extends AbstractAuthentication implements ChallengeAuthenticationInterface
+interface ChallengeAuthenticationInterface extends AuthenticationInterface
 {
 
-    /**
-     * Implements the CRAM-MD5 SASL mechanism
-     * This DOES NOT base64 encode the return value,
-     * you will need to do that yourself.
-     *
-     * @param string $challenge The challenge supplied by the server.
-     *                          this should be already base64_decoded.
-     *
-     * @return string The string to pass back to the server, of the form
-     *                "<user> <digest>". This is NOT base64_encoded.
-     */
-    public function createResponse($challenge = null)
-    {
-        return $this->options->getAuthcid() . ' ' . hash_hmac('md5', $challenge, $this->options->getSecret());
-    }
 }

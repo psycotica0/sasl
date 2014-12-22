@@ -44,7 +44,7 @@ use Fabiang\Sasl\Exception\InvalidArgumentException;
  *
  * @author Richard Heyes <richard@php.net>
  */
-class DigestMD5 extends AbstractAuthentication implements AuthenticationInterface
+class DigestMD5 extends AbstractAuthentication implements ChallengeAuthenticationInterface
 {
 
     /**

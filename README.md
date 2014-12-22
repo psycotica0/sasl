@@ -50,6 +50,8 @@ For authentication mechanism that use challenges call the method again:
 $response = $mechanism->createResponse($challenge);
 ```
 
+Challenge-based authentication mechanisms implement the interface
+`Fabiang\Sasl\Authentication\ChallengeAuthenticationInterface`.
 **Note**: The challenge must be Base64 decoded.
 
 ### SCRAM validation
