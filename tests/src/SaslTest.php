@@ -78,10 +78,20 @@ class SaslTest extends TestCase
      */
     public function testFactory($expectedInstance, $mechanism, $hashAlgo = null)
     {
-        $object = $this->object->factory($mechanism, array('authcid' => 'testuser'));
+        $object = $this->object->factory($mechanism, array(
+            'authcid'  => 'testuser',
+            'hostname' => 'hostname',
+            'service'  => 'servicename',
+            'secret'   => 'mysecret',
+            'authzid'  => 'authzid'
+        ));
         $this->assertInstanceOf($expectedInstance, $object);
         $this->assertInstanceOf('Fabiang\Sasl\Options', $object->getOptions());
         $this->assertSame('testuser', $object->getOptions()->getAuthcid());
+        $this->assertSame('mysecret', $object->getOptions()->getSecret());
+        $this->assertSame('authzid', $object->getOptions()->getAuthzid());
+        $this->assertSame('servicename', $object->getOptions()->getService());
+        $this->assertSame('hostname', $object->getOptions()->getHostname());
 
         if (null !== $hashAlgo) {
             $this->assertInstanceOf('Fabiang\Sasl\Authentication\SCRAM', $object);
