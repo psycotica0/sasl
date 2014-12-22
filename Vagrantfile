@@ -26,6 +26,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network "forwarded_port", guest: 15222, host: 15222
   config.vm.network "forwarded_port", guest: 11110, host: 11110
 
+  # Message after `vagrant up`
+  config.vm.post_up_message = <<MESSAGE
+You can now run the integration tests with:
+
+./vendor/bin/behat -c tests/behat.yml.dist
+MESSAGE
+
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   # config.vm.network "private_network", ip: "192.168.33.10"
