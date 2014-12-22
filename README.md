@@ -104,7 +104,7 @@ Just [install Vagrant](https://www.vagrantup.com/downloads.html) and run:
 vagrant up
 ```
 
-After so minutes you'll have the runnig server instances inside of a virtual machine.  
+After some minutes you'll have the runnig server instances inside of a virtual machine.  
 Now you can run the integration tests:
 
 ```
