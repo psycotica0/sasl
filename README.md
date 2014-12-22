@@ -33,7 +33,7 @@ use Fabiang\Sasl\Sasl;
 
 $factory = new Sasl;
 
-$mechanism = $factory->factory('SCRAM-MD5', array(
+$mechanism = $factory->factory('SCRAM-SHA-1', array(
     'authcid'  => 'username',
     'secret'   => 'password',
     'authzid'  => 'authzid', // optional. Username to proxy as
@@ -44,19 +44,19 @@ $mechanism = $factory->factory('SCRAM-MD5', array(
 $response = $mechanism->createResponse();
 ```
 
-For authentication mechanism that use challenges call the method again:
+Challenge-based authentication mechanisms implement the interface
+`Fabiang\Sasl\Authentication\ChallengeAuthenticationInterface`.
+For those mechanisms call the method again with the challenge:
 
 ```php
 $response = $mechanism->createResponse($challenge);
 ```
 
-Challenge-based authentication mechanisms implement the interface
-`Fabiang\Sasl\Authentication\ChallengeAuthenticationInterface`.
 **Note**: The challenge must be Base64 decoded.
 
-### SCRAM validation
+### SCRAM verification
 
-To validate the data returned by the server for SCRAM you can call:
+To verify the data returned by the server for SCRAM you can call:
 
 ```php
 $mechanism->verify($data);
