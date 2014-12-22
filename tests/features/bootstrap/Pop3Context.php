@@ -41,6 +41,7 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use PHPUnit_Framework_Assert as Assert;
 use Fabiang\Sasl\Sasl;
+use Fabiang\Sasl\Options;
 
 /**
  * Defines application features from the specific context.
@@ -132,12 +133,11 @@ class Pop3Context extends AbstractContext implements Context, SnippetAcceptingCo
      */
     public function autenticateWithCramMd5()
     {
-        $authenticationObject = $this->authenticationFactory->factory('CRAM-MD5');
-        $response = base64_encode($authenticationObject->getResponse(
-            $this->username,
-            $this->password,
-            $this->challenge
-        ));
+        $authenticationObject = $this->authenticationFactory->factory(
+            'CRAM-MD5',
+            new Options($this->username, $this->password)
+        );
+        $response = base64_encode($authenticationObject->createResponse($this->challenge));
         $this->write("$response\r\n");
     }
 

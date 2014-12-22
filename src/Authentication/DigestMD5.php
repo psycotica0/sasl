@@ -52,20 +52,20 @@ class DigestMD5 extends AbstractAuthentication implements AuthenticationInterfac
      * requires a few extra parameters than the other
      * mechanisms, which are unavoidable.
      *
-     * @param  string $authcid   Authentication id (username)
-     * @param  string $pass      Password
      * @param  string $challenge The digest challenge sent by the server
-     * @param  string $hostname  The hostname of the machine you're connecting to
-     * @param  string $service   The servicename (eg. imap, pop, acap etc)
-     * @param  string $authzid   Authorization id (username to proxy as)
      * @return string            The digest response (NOT base64 encoded)
-     * @access public
      */
-    public function getResponse($authcid, $pass, $challenge, $hostname, $service, $authzid = '')
+    public function createResponse($challenge = null)
     {
         $parsedChallenge = $this->parseChallenge($challenge);
         $authzidString = '';
-        if ($authzid != '') {
+
+        $authcid  = $this->options->getAuthcid();
+        $pass     = $this->options->getSecret();
+        $authzid  = $this->options->getAuthzid();
+        $service  = $this->options->getService();
+        $hostname = $this->options->getHostname();
+        if (!empty($authzid)) {
             $authzidString = 'authzid="' . $authzid . '",';
         }
 

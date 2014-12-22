@@ -65,18 +65,21 @@ class Sasl
      * Factory class. Returns an object of the request
      * type.
      *
-     * @param string $type One of: Anonymous
+     * @param string $type  One of: Anonymous
      *                             Plain
      *                             CramMD5
      *                             DigestMD5
      *                             SCRAM-* (any mechanism of the SCRAM family)
-     *                     Types are not case sensitive
+     *                      Types are not case sensitive
+     * @param Options|array Options for authentication
+     * @return Authentication\AuthenticationInterface
      */
-    public function factory($type)
+    public function factory($type, $options = array())
     {
         $className = null;
         $parameter = null;
         $matches   = array();
+        $options   = $this->createOptionsObject($options);
 
         $formatedType = strtolower(str_replace('-', '', $type));
 
@@ -91,7 +94,53 @@ class Sasl
             throw new InvalidArgumentException("Invalid SASL mechanism type '$type'");
         }
 
-        $object = new $className($parameter);
+        $object = new $className($options, $parameter);
         return $object;
+    }
+
+    /**
+     *
+     * @param Options|array $options
+     * @return \Fabiang\Sasl\Options
+     * @throws InvalidArgumentException
+     */
+    private function createOptionsObject($options)
+    {
+        $optionsObject = $options;
+
+        if (is_array($options)) {
+            $optionsObject = new Options(
+                $this->checkEmpty($options, 'authcid'),
+                $this->checkEmpty($options, 'secret'),
+                $this->checkEmpty($options, 'authzid'),
+                $this->checkEmpty($options, 'service'),
+                $this->checkEmpty($options, 'hostname')
+            );
+        }
+
+        if (!($optionsObject instanceof Options)) {
+            throw new InvalidArgumentException(
+                'Invalid options passed. Argument must be either of type "Fabiang\Sasl\Options" or "array", "'
+                . (is_object($options) ? get_class($options) : gettype($options))
+                . '" given.'
+            );
+        }
+
+        return $optionsObject;
+    }
+
+    /**
+     *
+     * @param array  $array
+     * @param string $key
+     * @return mixed
+     */
+    private function checkEmpty(array $array, $key)
+    {
+        if (!empty($array[$key])) {
+            return $array[$key];
+        }
+
+        return null;
     }
 }

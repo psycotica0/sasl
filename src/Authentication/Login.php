@@ -45,18 +45,16 @@ namespace Fabiang\Sasl\Authentication;
  *
  * @author Richard Heyes <richard@php.net>
  */
-class Login implements AuthenticationInterface
+class Login extends AbstractAuthentication implements AuthenticationInterface
 {
 
     /**
      * Pseudo SASL LOGIN mechanism
      *
-     * @param  string $user Username
-     * @param  string $pass Password
-     * @return string       LOGIN string
+     * @return string LOGIN string
      */
-    public function getResponse($user, $pass)
+    public function createResponse($challenge = null)
     {
-        return sprintf('LOGIN %s %s', $user, $pass);
+        return sprintf('LOGIN %s %s', $this->options->getAuthcid(), $this->options->getSecret());
     }
 }

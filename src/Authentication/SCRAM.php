@@ -38,6 +38,7 @@
 namespace Fabiang\Sasl\Authentication;
 
 use Fabiang\Sasl\Authentication\AbstractAuthentication;
+use Fabiang\Sasl\Options;
 use Fabiang\Sasl\Exception\InvalidArgumentException;
 
 /**
@@ -63,15 +64,18 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     /**
      * Construct a SCRAM-H client where 'H' is a cryptographic hash function.
      *
-     * @param string $hash The name cryptographic hash function 'H' as registered by IANA in the "Hash Function Textual
+     * @param Options $options
+     * @param string  $hash The name cryptographic hash function 'H' as registered by IANA in the "Hash Function Textual
      * Names" registry.
      * @link http://www.iana.org/assignments/hash-function-text-names/hash-function-text-names.xml "Hash Function Textual
      * Names"
      * format of core PHP hash function.
      * @throws InvalidArgumentException
      */
-    public function __construct($hash)
+    public function __construct(Options $options, $hash)
     {
+        parent::__construct($options);
+
         // Though I could be strict, I will actually also accept the naming used in the PHP core hash framework.
         // For instance "sha1" is accepted, while the registered hash name should be "SHA-1".
         $normalizedHash = str_replace('-', '', strtolower($hash));
@@ -95,20 +99,18 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
     /**
      * Provides the (main) client response for SCRAM-H.
      *
-     * @param  string $authcid   Authentication id (username)
-     * @param  string $pass      Password
      * @param  string $challenge The challenge sent by the server.
      * If the challenge is null or an empty string, the result will be the "initial response".
-     * @param  string $authzid   Authorization id (username to proxy as)
      * @return string|false      The response (binary, NOT base64 encoded)
      */
-    public function getResponse($authcid, $pass, $challenge = null, $authzid = null)
+    public function createResponse($challenge = null)
     {
-        $authcid = $this->formatName($authcid);
+        $authcid = $this->formatName($this->options->getAuthcid());
         if (empty($authcid)) {
             return false;
         }
 
+        $authzid = $this->options->getAuthzid();
         if (!empty($authzid)) {
             $authzid = $this->formatName($authzid);
         }
@@ -116,7 +118,7 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
         if (empty($challenge)) {
             return $this->generateInitialResponse($authcid, $authzid);
         } else {
-            return $this->generateResponse($challenge, $pass);
+            return $this->generateResponse($challenge, $this->options->getSecret());
         }
     }
 

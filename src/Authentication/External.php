@@ -42,19 +42,17 @@ namespace Fabiang\Sasl\Authentication;
  *
  * @author Christoph Schulz <develop@kristov.de>
  */
-class External implements AuthenticationInterface
+class External extends AbstractAuthentication implements AuthenticationInterface
 {
 
     /**
      * Returns EXTERNAL response
      *
-     * @param  string $authcid   Authentication id (username)
-     * @param  string $pass      Password
-     * @param  string $authzid   Autorization id
-     * @return string            EXTERNAL Response
+     * @param string $challenge
+     * @return stringEXTERNAL Response
      */
-    public function getResponse($authcid, $pass, $authzid = '')
+    public function createResponse($challenge = null)
     {
-        return $authzid;
+        return $this->options->getAuthcid();
     }
 }

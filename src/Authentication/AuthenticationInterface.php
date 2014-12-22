@@ -45,4 +45,10 @@ namespace Fabiang\Sasl\Authentication;
 interface AuthenticationInterface
 {
 
+    /**
+     * Create response.
+     *
+     * @param string $challenge Response challenge. Not every authentication method requires this value.
+     */
+    public function createResponse($challenge = null);
 }

@@ -41,6 +41,7 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use PHPUnit_Framework_Assert as Assert;
 use Fabiang\Sasl\Sasl;
+use Fabiang\Sasl\Options;
 
 /**
  * Defines application features from the specific context.
@@ -135,8 +136,11 @@ class XmppContext extends AbstractContext implements Context, SnippetAcceptingCo
      */
     public function authenticateWithMethodPlain()
     {
-        $authenticationObject = $this->authenticationFactory->factory('PLAIN');
-        $authenticationData   = $authenticationObject->getResponse($this->username, $this->password);
+        $authenticationObject = $this->authenticationFactory->factory(
+            'PLAIN',
+            new Options($this->username, $this->password)
+        );
+        $authenticationData   = $authenticationObject->createResponse();
         $this->write(
             '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">'
             . base64_encode($authenticationData) . '</auth>'
@@ -156,9 +160,12 @@ class XmppContext extends AbstractContext implements Context, SnippetAcceptingCo
      */
     public function authenticateWithMethodScramSha1()
     {
-        $this->authenticationObject = $this->authenticationFactory->factory('scram-sha-1');
+        $this->authenticationObject = $this->authenticationFactory->factory(
+            'scram-sha-1',
+            new Options($this->username, $this->password)
+        );
 
-        $authData = base64_encode($this->authenticationObject->getResponse($this->username, $this->password));
+        $authData = base64_encode($this->authenticationObject->createResponse());
         $this->write(
             "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='SCRAM-SHA-1'>$authData</auth>"
         );
@@ -172,17 +179,17 @@ class XmppContext extends AbstractContext implements Context, SnippetAcceptingCo
         $data = $this->readStreamUntil('</challenge>');
         Assert::assertRegExp("#<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>[^<]+</challenge>#", $data);
 
-        $authenticationObject = $this->authenticationFactory->factory('DIGEST-MD5');
+        $authenticationObject = $this->authenticationFactory->factory('DIGEST-MD5', new Options(
+            $this->username,
+            $this->password,
+            null,
+            'xmpp',
+            $this->domain
+        ));
 
         $challenge = substr($data, 52, -12);
 
-        $response = $authenticationObject->getResponse(
-            $this->username,
-            $this->password,
-            base64_decode($challenge),
-            $this->domain,
-            'xmpp'
-        );
+        $response = $authenticationObject->createResponse(base64_decode($challenge));
 
         $this->write(
             "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($response) . "</response>"
@@ -213,11 +220,7 @@ class XmppContext extends AbstractContext implements Context, SnippetAcceptingCo
 
         $challenge = base64_decode(substr($data, 52, -12));
 
-        $authData = $this->authenticationObject->getResponse(
-            $this->username,
-            $this->password,
-            $challenge
-        );
+        $authData = $this->authenticationObject->createResponse($challenge);
 
         $this->write(
             "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($authData) . "</response>"

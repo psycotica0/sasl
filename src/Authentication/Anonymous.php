@@ -42,7 +42,7 @@ namespace Fabiang\Sasl\Authentication;
  *
  * @author Richard Heyes <richard@php.net>
  */
-class Anonymous implements AuthenticationInterface
+class Anonymous extends AbstractAuthentication implements AuthenticationInterface
 {
 
     /**
@@ -56,13 +56,11 @@ class Anonymous implements AuthenticationInterface
      *
      * We could have some logic here for the second option, but this
      * would by no means create something interpretable.
-     *
-     * @param  string $token Optional email address or string to provide
-     *                       as trace information.
-     * @return string        The unaltered input token
+     * @param string $challenge
+     * @return string The unaltered input token
      */
-    public function getResponse($token = '')
+    public function createResponse($challenge = null)
     {
-        return $token;
+        return $this->options->getAuthcid();
     }
 }

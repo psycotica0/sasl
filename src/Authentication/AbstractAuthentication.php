@@ -37,6 +37,8 @@
 
 namespace Fabiang\Sasl\Authentication;
 
+use Fabiang\Sasl\Options;
+
 /**
  * Common functionality to SASL mechanisms
  *
@@ -51,6 +53,32 @@ abstract class AbstractAuthentication
      * @var bool
      */
     public static $useDevRandom = true;
+
+    /**
+     * Options object.
+     *
+     * @var Options
+     */
+    protected $options;
+
+    /**
+     *
+     * @param Options $options
+     */
+    public function __construct(Options $options)
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * Get options object.
+     *
+     * @return Options
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
 
     /**
      * Creates the client nonce for the response

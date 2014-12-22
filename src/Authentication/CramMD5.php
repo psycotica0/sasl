@@ -52,16 +52,14 @@ class CramMD5 extends AbstractAuthentication implements AuthenticationInterface
      * This DOES NOT base64 encode the return value,
      * you will need to do that yourself.
      *
-     * @param string $user      Username
-     * @param string $pass      Password
      * @param string $challenge The challenge supplied by the server.
      *                          this should be already base64_decoded.
      *
      * @return string The string to pass back to the server, of the form
      *                "<user> <digest>". This is NOT base64_encoded.
      */
-    public function getResponse($user, $pass, $challenge)
+    public function createResponse($challenge = null)
     {
-        return $user . ' ' . hash_hmac('md5', $challenge, $pass);
+        return $this->options->getAuthcid() . ' ' . hash_hmac('md5', $challenge, $this->options->getSecret());
     }
 }
