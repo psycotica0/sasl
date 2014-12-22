@@ -57,7 +57,7 @@ $response = $mechanism->createResponse($challenge);
 To validate the data returned by the server for SCRAM you can call:
 
 ```php
-$mechanism->processOutcome($data)
+$mechanism->verify($data);
 ```
 
 If the method returns false you should disconnect.
@@ -66,7 +66,7 @@ If the method returns false you should disconnect.
 
 List of options required by authentication mechanisms.
 For mechanisms that are challenge-based you'll need to call `createResponse()`
-again and send the response to the server with the returned value.
+again and send the returned value to the server.
 
 | Mechanism | Authcid | Secret | Authzid  | Service | Hostname | Challenge |
 | --------- | ------- | ------ | -------- | ------- | -------- | --------- |

@@ -246,6 +246,6 @@ class XmppContext extends AbstractContext implements Context, SnippetAcceptingCo
 
         $verfication = base64_decode(substr($data, 50, -10));
 
-        Assert::assertTrue($this->authenticationObject->processOutcome($verfication));
+        Assert::assertTrue($this->authenticationObject->verify($verfication));
     }
 }

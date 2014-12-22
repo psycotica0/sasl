@@ -182,7 +182,7 @@ class SCRAMTest extends TestCase
     }
 
     /**
-     * @covers ::processOutcome
+     * @covers ::verify
      * @covers ::getAuthMessage
      * @covers ::getSaltedPassword
      * @uses Fabiang\Sasl\Authentication\SCRAM::createResponse
@@ -196,7 +196,7 @@ class SCRAMTest extends TestCase
      * @uses Fabiang\Sasl\Options
      * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::__construct
      */
-    public function testProcessOutcome()
+    public function testVerify()
     {
         $this->object->createResponse(null);
         $this->object->createResponse('r=' . $this->object->getCnonce() . ',s=abcdefg=,i=2,a=2');
@@ -204,17 +204,17 @@ class SCRAMTest extends TestCase
         $serverKey       = hash_hmac('md5', "Server Key", $this->object->getSaltedPassword(), true);
         $serverSignature = hash_hmac('md5', $this->object->getAuthMessage(), $serverKey, true);
 
-        $this->assertTrue($this->object->processOutcome('v=' . base64_encode($serverSignature)));
+        $this->assertTrue($this->object->verify('v=' . base64_encode($serverSignature)));
     }
 
     /**
-     * @covers ::processOutcome
+     * @covers ::verify
      * @uses Fabiang\Sasl\Authentication\SCRAM::__construct
      * @uses Fabiang\Sasl\Options
      * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::__construct
      */
-    public function testProcessOutcomeNoResponseBefore()
+    public function testVerifyNoResponseBefore()
     {
-        $this->assertFalse($this->object->processOutcome(''));
+        $this->assertFalse($this->object->verify(''));
     }
 }

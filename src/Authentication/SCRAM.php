@@ -49,7 +49,7 @@ use Fabiang\Sasl\Exception\InvalidArgumentException;
  *
  * @author Jehan <jehan.marmottard@gmail.com>
  */
-class SCRAM extends AbstractAuthentication implements AuthenticationInterface
+class SCRAM extends AbstractAuthentication implements AuthenticationInterface, VerificationInterface
 {
 
     private $hashAlgo;
@@ -227,7 +227,7 @@ class SCRAM extends AbstractAuthentication implements AuthenticationInterface
      * @return bool Whether the server has been authenticated.
      * If false, the client must close the connection and consider to be under a MITM attack.
      */
-    public function processOutcome($data)
+    public function verify($data)
     {
         $verifierRegexp = '#^v=((?:[A-Za-z0-9/+]{4})*(?:[A-Za-z0-9/]{3}=|[A-Za-z0-9/]{2}==)?)$#';
 

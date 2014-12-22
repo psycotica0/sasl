@@ -107,6 +107,25 @@ class SaslTest extends TestCase
      * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::__construct
      * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::getOptions
      */
+    public function testFactoryWithOptionsArray()
+    {
+        $object = $this->object->factory('login', array(
+            'authcid'  => 'testuser',
+            'hostname' => 'hostname',
+            'service'  => 'servicename',
+            'secret'   => 'mysecret',
+        ));
+        $this->assertNull($object->getOptions()->getAuthzid());
+    }
+
+    /**
+     * @covers ::factory
+     * @covers ::createOptionsObject
+     * @covers ::checkEmpty
+     * @uses Fabiang\Sasl\Options
+     * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::__construct
+     * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::getOptions
+     */
     public function testFactoryWithOptionsObject()
     {
         $options = new Options('test');
