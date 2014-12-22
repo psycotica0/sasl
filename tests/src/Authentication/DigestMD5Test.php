@@ -168,7 +168,7 @@ class DigestMD5Test extends TestCase
      */
     public function testGetResponseInvalidChallenge()
     {
-        $this->object->createResponse('test', 'test', 'invalid_chalenge', 'host', 'service');
+        $this->object->createResponse('invalid_challenge');
     }
 
     /**
@@ -182,6 +182,6 @@ class DigestMD5Test extends TestCase
      */
     public function testParseChallengeNotAllowiedMultiples()
     {
-        $this->object->createResponse('test', 'test', 'qop=1,qop=2', 'host', 'service');
+        $this->object->createResponse('qop=1,qop=2');
     }
 }
