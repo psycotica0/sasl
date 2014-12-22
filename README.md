@@ -24,6 +24,60 @@ curl -sS https://getcomposer.org/installer | php
 php composer.phar require fabiang/sasl='1.0.x-dev'
 ```
 
+## Usage
+
+Use the factory method to create a authentication mechanism object:
+
+```php
+use Fabiang\Sasl\Sasl;
+
+$factory = new Sasl;
+
+$mechanism = $factory->factory('SCRAM-MD5', array(
+    'authcid'  => 'username',
+    'secret'   => 'password',
+    'authzid'  => 'authzid', // optional. Username to proxy as
+    'service'  => 'servicename', // optional. Name of the service
+    'hostname' => 'hostname', // optional. Hostname of the service
+));
+
+$response = $mechanism->createResponse();
+```
+
+For authentication mechanism that use challenges call the method again:
+
+```php
+$response = $mechanism->createResponse($challenge);
+```
+
+**Note**: The challenge must be Base64 decoded.
+
+### SCRAM validation
+
+To validate the data returned by the server for SCRAM you can call:
+
+```php
+$mechanism->processOutcome($data)
+```
+
+If the method returns false you should disconnect.
+
+### Required options
+
+List of options required by authentication mechanisms.
+For mechanisms that are challenge-based you'll need to call `createResponse()`
+again and send the response to the server with the returned value.
+
+| Mechanism | Authcid | Secret | Authzid  | Service | Hostname | Challenge |
+| --------- | ------- | ------ | -------- | ------- | -------- | --------- |
+| Anonymous | yes     | no     | no       | no      | no       | no        |
+| CramMD5   | yes     | yes    | no       | no      | no       | yes       |
+| DigestMD5 | yes     | yes    | optional | yes     | yes      | yes       |
+| External  | no      | no     | yes      | no      | no       | no        |
+| Login     | yes     | yes    | no       | no      | no       | no        |
+| Plain     | yes     | yes    | optional | no      | no       | no        |
+| SCRAM-*   | yes     | yes    | optional | no      | no       | yes       |
+
 ## Developing
 
 If you like this library and you want to contribute, make sure the unit tests
