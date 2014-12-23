@@ -184,8 +184,8 @@ class SCRAM extends AbstractAuthentication implements ChallengeAuthenticationInt
             return false;
         }
 
-        $channel_binding      = 'c=' . base64_encode($this->gs2Header);
-        $finalMessage         = $channel_binding . ',r=' . $nonce;
+        $channelBinding       = 'c=' . base64_encode($this->gs2Header);
+        $finalMessage         = $channelBinding . ',r=' . $nonce;
         $saltedPassword       = $this->hi($password, $salt, $i);
         $this->saltedPassword = $saltedPassword;
         $clientKey            = call_user_func($this->hmac, $saltedPassword, "Client Key", true);
