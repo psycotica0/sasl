@@ -94,19 +94,7 @@ class XmppContext extends AbstractContext implements Context, SnippetAcceptingCo
         }
 
         $this->authenticationFactory = new Sasl;
-        $this->logfile = fopen($logdir . '/behat.xmpp.' . time() . '.log', 'w');
-    }
-
-    /**
-     * @AfterScenario
-     */
-    public function closeConnection()
-    {
-        if ($this->stream) {
-            fclose($this->stream);
-        }
-
-        fclose($this->logfile);
+        $this->logdir = $logdir;
     }
 
     /**

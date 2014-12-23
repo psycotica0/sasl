@@ -38,6 +38,7 @@
 namespace Fabiang\Sasl\Behat;
 
 use PHPUnit_Framework_Assert as Assert;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 
 /**
  * Defines application features from the specific context.
@@ -48,6 +49,7 @@ abstract class AbstractContext
 {
 
     protected $stream;
+    protected $logdir;
     protected $logfile;
 
     protected function connect()
@@ -86,13 +88,47 @@ abstract class AbstractContext
     protected function read()
     {
         $data = fread($this->stream, 4096);
-        fwrite($this->logfile, 'S: ' . $data . "\n");
+        fwrite($this->logfile, 'S: ' . trim($data) . "\n");
         return $data;
     }
 
     protected function write($data)
     {
         fwrite($this->stream, $data);
-        fwrite($this->logfile, 'C: ' . $data . "\n");
+        fwrite($this->logfile, 'C: ' . trim($data) . "\n");
+    }
+
+    /**
+     * @BeforeScenario
+     */
+    public function openLog(BeforeScenarioScope $scope)
+    {
+        $featureTags  = $scope->getFeature()->getTags();
+        $mechanism    = array_shift($featureTags);
+        $scenarioTags = $scope->getScenario()->getTags();
+        $type         = array_shift($scenarioTags);
+
+        $this->logfile = fopen(
+            sprintf(
+                '%s/behat.%s.%s.%s.log',
+                $this->logdir,
+                $mechanism,
+                $type,
+                time()
+            ),
+            'c'
+        );
+    }
+
+    /**
+     * @AfterScenario
+     */
+    public function closeConnection()
+    {
+        if ($this->stream) {
+            fclose($this->stream);
+        }
+
+        fclose($this->logfile);
     }
 }
