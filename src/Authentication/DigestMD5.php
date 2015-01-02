@@ -38,6 +38,7 @@
 namespace Fabiang\Sasl\Authentication;
 
 use Fabiang\Sasl\Exception\InvalidArgumentException;
+use Fabiang\Sasl\Exception\RuntimeException;
 
 /**
  * Implmentation of DIGEST-MD5 SASL mechanism
@@ -155,7 +156,13 @@ class DigestMD5 extends AbstractAuthentication implements ChallengeAuthenticatio
         if ($key !== 'opaque' && $key !== 'domain') {
             if (!empty($tokens[$key])) {
                 // Allowed multiple "realm" and "auth-param"
-                if ($key == 'realm' || $key == 'auth-param') {
+                if ('realm' === $key || 'auth-param' === $key) {
+
+                    // we don't support multiple realms yet
+                    if ('realm' === $key) {
+                        throw new RuntimeException('Multiple realms are not supported');
+                    }
+
                     $tokens[$key] = (array) $tokens[$key];
                     $tokens[$key][] = $this->trim($value);
 

@@ -84,9 +84,24 @@ class DigestMD5Test extends TestCase
             '#^username="authcid",realm="localhost",authzid="authzid",nonce="abcdefghijklmnopqrstuvw",cnonce="[^"]+",nc=00000001,'
             . 'qop=auth,digest-uri="service/hostname",response=[^,]+,maxbuf=65536$#',
             $this->object->createResponse(
-                'realm="localhost",nonce="abcdefghijklmnopqrstuvw",qop="auth",charset=utf-8,algorithm=md5-sess'
+                'realm="localhost",nonce="abcdefghijklmnopqrstuvw",qop="auth",charset=utf-8,algorithm=md5-sess,'
+                . 'auth-param=1,auth-param=2'
             )
         );
+    }
+
+    /**
+     * @covers ::checkToken
+     * @uses Fabiang\Sasl\Authentication\DigestMD5::createResponse
+     * @uses Fabiang\Sasl\Authentication\DigestMD5::parseChallenge
+     * @uses Fabiang\Sasl\Authentication\DigestMD5::trim
+     * @uses Fabiang\Sasl\Options
+     * @uses Fabiang\Sasl\Authentication\AbstractAuthentication::__construct
+     * @expectedException Fabiang\Sasl\Exception\RuntimeException
+     */
+    public function testGetResponseWithMultipleRealms()
+    {
+        $this->object->createResponse('realm="localhost",realm="phpunit"');
     }
 
     /**
