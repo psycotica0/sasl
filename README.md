@@ -21,7 +21,7 @@ The easiest way to install fabiang/sasl is by using Composer:
 
 ```
 curl -sS https://getcomposer.org/installer | php
-php composer.phar require fabiang/sasl='1.0.x-dev'
+php composer.phar require fabiang/sasl
 ```
 
 ## Usage
