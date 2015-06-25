@@ -4,6 +4,10 @@ imports:
 filter:
     paths:
         - src/*
+
+checks:
+    php: true
+
 tools:
     php_code_sniffer:
         config:
