@@ -39,15 +39,19 @@
 
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.4/phpunit.xsd"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.8/phpunit.xsd"
     bootstrap="./bootstrap.php"
     colors="true"
     convertErrorsToExceptions="true"
     convertNoticesToExceptions="true"
     convertWarningsToExceptions="true"
     forceCoversAnnotation="true"
-    strict="true"
-    verbose="true">
+    verbose="true"
+    beStrictAboutTestsThatDoNotTestAnything="true"
+    checkForUnintentionallyCoveredCode="true"
+    beStrictAboutOutputDuringTests="true"
+    beStrictAboutTestSize="true"
+    beStrictAboutTodoAnnotatedTests="true">
 
         <testsuites>
             <testsuite name="Fabiang_Sasl">
