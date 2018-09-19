@@ -47,7 +47,7 @@ if [ -z `which ejabberdctl` ]; then
     echo "done"
 fi
 
-ejabberd_config="/etc/ejabberd/ejabberd.cfg"
+ejabberd_config="/etc/ejabberd/ejabberd.yml"
 ejabberd_configured="/etc/ejabberd/configured"
 ejabberd_restart=0
 
@@ -58,16 +58,27 @@ if [ ! -f "$ejabberd_configured" ]; then
 
     cp "$ejabberd_config" "$ejabberd_config.orig"
 
-    port_config=$(grep '  {5222, ejabberd_c2s, \[' $ejabberd_config)
+    port_config=$(grep '^    port: 5222' $ejabberd_config)
     if [ -n "$port_config" ]; then
         ejabberd_restart=1
-        sed -i 's/{5222, ejabberd_c2s,/{15222, ejabberd_c2s,/' "$ejabberd_config"
+        sed -i 's/^    port: 5222/    port: 15222/' "$ejabberd_config"
     fi
 
-    host_config=$(grep '%% {hosts, \["localhost"\]}.' $ejabberd_config)
+    host_config=$(grep -zoP '\nhosts:\n  - "localhost"\n\n' $ejabberd_config)
     if [ -n "$host_config" ]; then
         ejabberd_restart=1
-        sed -i "s/{hosts, \\[\"localhost\"\\]}./{hosts, [\"localhost\", \"$HOSTNAME\"]}./" "$ejabberd_config"
+        sed -i "s/^  - \"localhost\"/  - \"localhost\"\n  - \"$HOSTNAME\"/" "$ejabberd_config"
+    fi
+
+    activate_digest_auth=$(grep '^disable_sasl_mechanisms: "digest-md5"' $ejabberd_config)
+    if [ -n "$activate_digest_auth" ]; then
+        ejabberd_restart=1
+        sed -i 's/^disable_sasl_mechanisms:/#disable_sasl_mechanisms:/' "$ejabberd_config"
+    fi
+
+    store_password_plain=$(grep '^auth_password_format: scram' $ejabberd_config)
+    if [ -n "$store_password_plain" ]; then
+        sed -i 's/^auth_password_format: scram/auth_password_format: plain/' $ejabberd_config
     fi
 
     iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT

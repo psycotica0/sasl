@@ -89,9 +89,9 @@ if [ ! -f "$dovecot_configured" ]; then
         dovecot_restart=1
     fi
 
-    config_mail=$(grep '#mail_location =' "$dovecot_mail_config")
+    config_mail=$(grep '^mail_location = mbox:~/mail:INBOX=/var/mail/%u' "$dovecot_mail_config")
     if [ -n "$config_mail" ]; then
-        sed -i 's/#mail_location =/mail_location = maildir:~\/Maildir/' "$dovecot_mail_config"
+        sed -i 's/^mail_location =/mail_location = maildir:~\/Maildir\n#mail_location =/' "$dovecot_mail_config"
         dovecot_restart=1
     fi
 
