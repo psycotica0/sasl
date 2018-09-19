@@ -2,3 +2,4 @@
 .vagrant/
 /tests/behat.yml
 /tests/phpunit.xml
+/nbproject/private/
