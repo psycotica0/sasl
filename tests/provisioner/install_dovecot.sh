@@ -41,7 +41,7 @@ dovecot_password=$2
 # Install dovecot when control binary doesn't exists
 if [ -z `which dovecot` ]; then
     echo -n "Install dovecot... "
-    apt-get install -y dovecot-pop3d > /dev/null
+    apt-get install -y dovecot-core dovecot-pop3d > /dev/null
     echo "done"
 fi
 
