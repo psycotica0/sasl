@@ -93,7 +93,7 @@ composer install --dev
 After that run the unit tests:
 
 ```
-./vendor/bin/phpunit -c tests
+./vendor/bin/phpunit
 ```
 
 The integration tests verify the authentication methods against an Ejabberd and Dovecot server.
@@ -108,7 +108,7 @@ After some minutes you'll have the runnig server instances inside of a virtual m
 Now you can run the integration tests:
 
 ```
-./vendor/bin/behat -c tests/behat.yml.dist
+./vendor/bin/behat
 ```
 
 ## License

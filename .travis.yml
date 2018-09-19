@@ -26,7 +26,7 @@ before_script:
     - cat tests/behat.yml.dist | sed "s/precise32/$HOSTNAME/" > tests/behat.yml
 
 script:
-    - ./vendor/bin/phpunit --coverage-clover=build/logs/clover.xml
+    - ./vendor/bin/phpunit --coverage-clover=build/logs/clover.xml --verbose
     - ./vendor/bin/behat -c tests/behat.yml -f progress
 
 after_script:
