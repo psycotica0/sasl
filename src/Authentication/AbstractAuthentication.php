@@ -89,7 +89,7 @@ abstract class AbstractAuthentication
     {
         foreach (array('/dev/urandom', '/dev/random') as $file) {
             if (true === static::$useDevRandom && is_readable($file)) {
-                return base64_encode(file_get_contents($file, false, null, -1, 32));
+                return base64_encode(file_get_contents($file, false, null, 0, 32));
             }
         }
 
